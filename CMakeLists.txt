@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7.0)
-project(CGomoku VERSION 0.1.0 DESCRIPTION "Game of Gomoku made in C" LANGUAGES C)
+project(CGomoku VERSION 0.1.0)
 
 # Set executable output path to inside the build tree
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
