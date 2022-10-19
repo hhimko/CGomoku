@@ -18,8 +18,8 @@ target_compile_options(${BIN_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Add SDL2 libs
-# find_package(SDL2 REQUIRED)
-# target_link_libraries(${PROJECT_NAME} SDL2::Main)
+find_package(SDL2 REQUIRED)
+target_link_libraries(${BIN_NAME} SDL2::Main)
 
 target_include_directories(${BIN_NAME} PUBLIC src)
 target_include_directories(${BIN_NAME} PUBLIC ${SDL2_INCLUDE_DIR})

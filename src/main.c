@@ -1,7 +1,6 @@
-#include <stdio.h>
-#include "test.h"
+#include "./gomoku.h"
 
-int main() {
-    test();
-    return 0;
+
+int main(int argc, char* argv[]) {
+    Gomoku_run(argc, argv);
 }
