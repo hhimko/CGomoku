@@ -18,7 +18,7 @@ CGomoku (otherwise known as *Five in a Row*) is a two player strategy game playe
 
 ## Building & Compiling From Source
 
-CGomoku uses [CMake] as its build system.
+CGomoku uses [CMake] (ver. 3.12+) as its build system.
 
 - Clone this repo:
   ```console

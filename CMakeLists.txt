@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7.0)
+cmake_minimum_required(VERSION 3.12.0)
 project(CGomoku VERSION 0.1.0)
 
 # Set executable output path to inside the build tree
@@ -8,7 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(BIN_NAME Gomoku)
 
 # Add project sources
-file(GLOB SOURCES "src/*.c")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.c") # https://stackoverflow.com/questions/1027247/is-it-better-to-specify-source-files-with-glob-or-each-file-individually-in-cmak
 add_executable(${BIN_NAME} ${SOURCES})
 target_include_directories(${BIN_NAME} PUBLIC src/)
 
@@ -17,7 +17,7 @@ target_compile_options(${BIN_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
 target_compile_options(${BIN_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>)
 
 # Link CMake modules
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+# list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Add SDL2 libs
 if(WIN32)
@@ -25,7 +25,7 @@ if(WIN32)
 
     # Fall back to looking for SDL2 locally
     if(NOT SDL2_FOUND)
-        set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/SDL2)
+        set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2)
 
         if(MINGW)
             # Support both 32 and 64 bit builds
