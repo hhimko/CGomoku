@@ -59,7 +59,7 @@ CGomoku uses no more than the `SDL2` library.
     
   - Under **Windows**:
     1. Download the latest release of [SDL2-devel] for either VC or MinGW.
-    2. Extract the dowloaded file to `CGomoku/include`.
+    2. Extract the downloaded file to `CGomoku/include`.
     3. Change the extracted directory name from `SDL2-x.x.x` to `SDL2`.
 
   For other OSs please refer to [SDL Wiki's Installation Guide].
