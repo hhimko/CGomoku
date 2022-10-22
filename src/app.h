@@ -6,8 +6,9 @@
 #include "./scenes/scene.h"
 
 
-typedef void (*sceneUpdateCallback)(int);
-typedef void (*sceneRenderCallback)(SDL_Renderer*);
+typedef void (*sceneUpdateCallback)(uint64_t dt);
+typedef void (*sceneRenderCallback)(SDL_Renderer* rend);
+typedef void (*sceneHandleInputCallback)(SDL_Event* event);
 
 typedef struct AppState AppState;
 
@@ -16,10 +17,11 @@ struct AppState {
     Scene scene;
     sceneUpdateCallback update;
     sceneRenderCallback render;
-    uint8_t fps;
+    sceneHandleInputCallback handle_input;
+    uint16_t fps_cap;
 };
 
-AppState* createAppState(SDL_Renderer* rend, uint8_t fps);
+AppState* createAppState(SDL_Renderer* rend, uint16_t fps);
 void destroyAppState(AppState* state);
 
 /* Gomoku app entry point */
