@@ -3,15 +3,20 @@
 #include <SDL.h>
 
 
+void menuUpdate(uint64_t dt) {
+    (void) dt;
+}
+
 void menuRender(SDL_Renderer* rend) {
     (void) rend;
 }
 
-void menuUpdate(int dt) {
-    (void) dt;
+void menuHandleInput(SDL_Event* e) {
+    (void) e;
 }
 
 void setMenuSceneCallbacks(AppState* state) {
-    state->render = menuRender;
     state->update = menuUpdate;
+    state->render = menuRender;
+    state->handle_input = menuHandleInput;
 }

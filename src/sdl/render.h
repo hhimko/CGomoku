@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 
-int initSDL(SDL_Renderer* rend, SDL_Window* win);
+int initSDL(SDL_Renderer** rend, SDL_Window** win);
 void quitSDL(SDL_Renderer* rend, SDL_Window* win);
 
 #endif /* RENDER_H_ */
