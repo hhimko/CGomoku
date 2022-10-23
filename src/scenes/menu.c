@@ -2,13 +2,15 @@
 
 #include <SDL.h>
 
+#include "../board.h"
+
 
 void menuUpdate(uint64_t dt) {
     (void) dt;
 }
 
 void menuRender(SDL_Renderer* rend) {
-    (void) rend;
+    renderBoard(rend);
 }
 
 void menuHandleInput(SDL_Event* e) {

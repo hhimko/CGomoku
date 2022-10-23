@@ -70,9 +70,7 @@ void mainloop(AppState* state) {
         SDL_RenderClear(renderer);
 
         state->render(renderer);
-        // SDL_RenderPresent(renderer);
-
-        SDL_Delay(10);
+        SDL_RenderPresent(renderer);
 
         // wait the remaining frame time to minimalize CPU load
         uint64_t f_end = SDL_GetTicks64();

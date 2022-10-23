@@ -18,6 +18,7 @@ void setScene(AppState* state, Scene scene) {
             break;
     }
 
-    assert(state->update); // |
-    assert(state->render); // | both callbacks should always be set after calling the function
+    assert(state->update);       // |
+    assert(state->render);       // | 
+    assert(state->handle_input); // | all callbacks should always be set after calling the function
 }
