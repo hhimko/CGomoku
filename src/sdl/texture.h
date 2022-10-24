@@ -3,6 +3,12 @@
 
 #include <SDL.h>
 
+
+/* Helper function for reading the texture dimenstions. */
+static inline int getTextureSize(SDL_Texture* tex, int* w, int* h) {
+    return SDL_QueryTexture(tex, NULL, NULL, w, h);
+}
+
 /* Generate a 2x2 pixel "missing" texture. */
 SDL_Texture* loadMissingTexture(SDL_Renderer* rend);
 

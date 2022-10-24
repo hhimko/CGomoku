@@ -7,7 +7,7 @@ int initSDL(SDL_Renderer** rend, SDL_Window** win) {
     Uint32 winFlags = 0;
     *win = SDL_CreateWindow("CGomoku", 
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        1000, 800, winFlags);
+        1920, 1080, winFlags);
     if (win == NULL) return -1;
 
     Uint32 rendFlags = SDL_RENDERER_ACCELERATED;

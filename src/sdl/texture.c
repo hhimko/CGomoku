@@ -4,11 +4,8 @@
 
 
 SDL_Texture* loadMissingTexture(SDL_Renderer* rend){
-    if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest")) {
-        fprintf(stderr, "Failed to set hint SDL_HINT_RENDER_SCALE_QUALITY to \"nearest\". \nSDL_Error: %s\n", SDL_GetError());
-    }
-
     SDL_Texture* tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 2, 2);
+    
     if (tex != NULL && SDL_SetRenderTarget(rend, tex) >= 0) {
         SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
         SDL_RenderDrawPoint(rend, 0, 0);

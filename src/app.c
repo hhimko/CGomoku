@@ -96,7 +96,7 @@ int Gomoku_run(int argc, char* argv[]) {
     AppState* state = createAppState(renderer, fps);
     mainloop(state);
 
-    /* free up resources after the mainloop quits */
+    // free up resources after the mainloop quits
     destroyAppState(state);
     quitSDL(renderer, window);
     return 0;
