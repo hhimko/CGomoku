@@ -7,7 +7,7 @@ typedef enum Scene {
     SCENE_GAME
 } Scene;
 
-typedef struct AppState AppState; // AppState declaration to avoid circular imports
-void setScene(AppState* state, Scene scene);
+struct AppState; // \skip AppState redeclaration to avoid circular imports 
+void setScene(struct AppState* state, Scene scene);
 
 #endif /* SCENE_H_ */

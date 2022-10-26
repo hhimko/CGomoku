@@ -5,13 +5,16 @@
 #include <SDL.h>
 
 #include "./scenes/scene.h"
-#include "./sdl/render.h"
+
+#define DEFAULT_FPS 60
+#define DEFAULT_SCREEN_WIDTH 1920
+#define DEFAULT_SCREEN_HEIGHT 1080
 
 
-AppState* createAppState(SDL_Renderer* rend, uint16_t fps_cap) {
+AppState* createAppState(RenderContext* ctx, uint16_t fps_cap) {
     AppState* state = malloc(sizeof(AppState));
 
-    state->renderer = rend;
+    state->context = ctx;
     state->fps_cap = fps_cap;
 
     state->update = NULL;
@@ -31,11 +34,9 @@ int handleEvents(AppState* state) {
     static SDL_Event e;
 
     while(SDL_PollEvent(&e)) {
-        if (e.type == SDL_QUIT) {
-            return -1;
-        }
+        if (e.type == SDL_QUIT) return -1; // signal app quit
         
-        state->handle_input(&e);
+        if (state->handle_input(&e, state)) continue;
     }
 
     return 0;
@@ -43,7 +44,8 @@ int handleEvents(AppState* state) {
 
 void mainloop(AppState* state) {
     SDL_bool running = SDL_TRUE;
-    SDL_Renderer* renderer = state->renderer; 
+    RenderContext* context = state->context; 
+    SDL_Renderer* renderer = context->renderer; 
 
     const uint64_t ms_per_frame = (uint64_t)round(1000.0 / (double)state->fps_cap);
 
@@ -69,7 +71,7 @@ void mainloop(AppState* state) {
         SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
-        state->render(renderer);
+        state->render(context);
         SDL_RenderPresent(renderer);
 
         // wait the remaining frame time to minimalize CPU load
@@ -85,19 +87,21 @@ int Gomoku_run(int argc, char* argv[]) {
     (void) argv; // | unused
 
     SDL_Window* window = NULL;
-    SDL_Renderer* renderer = NULL;
+    RenderContext* context = createRenderContext(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 
-    if (initSDL(&renderer, &window) < 0) {
+    if (initSDL(context, &window) < 0) {
         fprintf(stderr, "Failed to initialize SDL.\n SDL_Error: %s\n", SDL_GetError()); 
         return -1;
     }
 
-    uint16_t fps = 60;
-    AppState* state = createAppState(renderer, fps);
+    uint16_t fps = DEFAULT_FPS;
+    AppState* state = createAppState(context, fps);
     mainloop(state);
 
     // free up resources after the mainloop quits
     destroyAppState(state);
-    quitSDL(renderer, window);
+    quitSDL(context, window);
+    destroyRenderContext(context);
+
     return 0;
 }

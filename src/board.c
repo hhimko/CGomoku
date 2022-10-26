@@ -6,10 +6,14 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 
-void renderTatamiBackground(SDL_Renderer* rend, double zoom, double offset_x, double offset_y) {
+void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, double offset_y) {
     zoom = MAX(zoom, 1); // zoom value must be greater than 1
     offset_x = MAX(MIN(offset_x, 1), -1); // |
     offset_y = MAX(MIN(offset_y, 1), -1); // | offset values must be normalized to [-1, 1] range
+
+    SDL_Renderer* rend = ctx->renderer;
+    int win_w = ctx->win_w; 
+    int win_h = ctx->win_h;
 
     SDL_Texture* tatami = loadTextureBMP(rend, "../assets/tatami.bmp");
     SDL_Texture* tatami_half = loadTextureBMP(rend, "../assets/tatami_half.bmp");
@@ -20,8 +24,6 @@ void renderTatamiBackground(SDL_Renderer* rend, double zoom, double offset_x, do
         tex_w = 800; // |
         tex_h = 800; // | quietly set an arbitrarily size manually
     }
-
-    int win_w = 1920, win_h = 1080; // TODO: read true window dimensions 
 
     // bg is scaled in order to fill the entire screen
     double scale_ratio = MAX(win_w * zoom / tex_w, win_h * zoom / tex_h);  
@@ -93,6 +95,6 @@ void renderTatamiBackground(SDL_Renderer* rend, double zoom, double offset_x, do
     SDL_DestroyTexture(tatami_half);
 }
 
-void renderBoard(SDL_Renderer* rend) {
-    (void) rend;
+void renderBoard(RenderContext* ctx) {
+    (void) ctx;
 }

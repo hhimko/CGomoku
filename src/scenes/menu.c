@@ -8,10 +8,7 @@
 static double s_parallax_x = 0;
 static double s_parallax_y = 0;
 
-
-void updateParallax(int32_t mouse_x, int32_t mouse_y) {
-    int32_t win_w = 1920, win_h = 1080; // TODO: read true window dimensions 
-
+void updateParallax(int32_t mouse_x, int32_t mouse_y, int win_w, int win_h) {
     s_parallax_x = (mouse_x / (double)win_w) * 2 - 1; // |
     s_parallax_y = (mouse_y / (double)win_h) * 2 - 1; // | values normalized into [-1, 1] range
 
@@ -29,21 +26,20 @@ void menuUpdate(uint64_t dt) {
     (void) dt;
 }
 
-void menuRender(SDL_Renderer* rend) {
-    renderTatamiBackground(rend, 1.2, s_parallax_x + 0.5, s_parallax_y);
+void menuRender(RenderContext* ctx) {
+    renderTatamiBackground(ctx, 1.2, s_parallax_x + 0.5, s_parallax_y);
 }
 
-void menuHandleInput(SDL_Event* e) {
+int menuHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
             int32_t mx = e->motion.x;
             int32_t my = e->motion.y;
-            updateParallax(mx, my);
-            break;
-        
-        default:
-            break;
+            updateParallax(mx, my, state->context->win_w, state->context->win_h);
+            return 1;
     }
+
+    return 0;
 }
 
 void setMenuSceneCallbacks(AppState* state) {
