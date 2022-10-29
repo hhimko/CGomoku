@@ -10,16 +10,9 @@
 /* Structure containing application state variables, shared among all game scenes. */
 typedef struct AppState AppState;
 
-typedef void (*sceneUpdateCallback)(uint64_t dt);
-typedef void (*sceneRenderCallback)(RenderContext* ctx);
-typedef int (*sceneHandleInputCallback)(SDL_Event* event, AppState* state);
-
 struct AppState {
     RenderContext* context;
     Scene scene;
-    sceneUpdateCallback update;
-    sceneRenderCallback render;
-    sceneHandleInputCallback handle_input;
     uint16_t fps_cap;
 };
 

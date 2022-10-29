@@ -4,6 +4,6 @@
 #include "../app.h"
 
 
-void setMenuSceneCallbacks(AppState* state);
+void setMenuSceneCallbacks(AppState* stat);
 
 #endif /* MENU_H_ */

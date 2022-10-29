@@ -13,15 +13,12 @@
 
 AppState* createAppState(RenderContext* ctx, uint16_t fps_cap) {
     AppState* state = malloc(sizeof(AppState));
-
-    state->context = ctx;
-    state->fps_cap = fps_cap;
-
-    state->update = NULL;
-    state->render = NULL;
-    state->handle_input = NULL;
-    state->scene = -1;
-    setScene(state, SCENE_MENU); // sets members: scene, update, render, handle_input
+    
+    if (state != NULL) {
+        state->context = ctx;
+        state->fps_cap = fps_cap;
+        setScene(state, SCENE_MENU); // initializes scene to main menu
+    }
 
     return state;
 }
@@ -36,7 +33,7 @@ int handleEvents(AppState* state) {
     while(SDL_PollEvent(&e)) {
         if (e.type == SDL_QUIT) return -1; // signal app quit
         
-        if (state->handle_input(&e, state)) continue;
+        if (state->scene.handle_input(&e, state)) continue;
     }
 
     return 0;
@@ -65,13 +62,13 @@ void mainloop(AppState* state) {
         }
 
         // update logic state
-        state->update(f_elapsed);
+        state->scene.update(f_elapsed);
 
         // render game to screen
         SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
-        state->render(context);
+        state->scene.render(context);
         SDL_RenderPresent(renderer);
 
         // wait the remaining frame time to minimalize CPU load

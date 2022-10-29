@@ -3,6 +3,7 @@
 #include <SDL.h>
 
 #include "../board.h"
+#include "../app.h"
 
 
 static double s_parallax_x = 0;
@@ -43,7 +44,7 @@ int menuHandleInput(SDL_Event* e, AppState* state) {
 }
 
 void setMenuSceneCallbacks(AppState* state) {
-    state->update = menuUpdate;
-    state->render = menuRender;
-    state->handle_input = menuHandleInput;
+    state->scene.update = menuUpdate;
+    state->scene.render = menuRender;
+    state->scene.handle_input = menuHandleInput;
 }
