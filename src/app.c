@@ -33,7 +33,7 @@ int handleEvents(AppState* state) {
     while(SDL_PollEvent(&e)) {
         if (e.type == SDL_QUIT) return -1; // signal app quit
         
-        if (state->scene.handle_input(&e, state)) continue;
+        if (state->scene.handle_input(&e, state) == SDL_TRUE) continue;
     }
 
     return 0;
