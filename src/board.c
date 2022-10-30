@@ -2,6 +2,10 @@
 
 #include "./sdl/texture.h"
 
+#define LINE_WIDTH 2.0f
+#define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
+#define BORDER_WIDTH 4.0f
+
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
@@ -16,9 +20,45 @@ Board* createBoard() {
     return board;
 }
 
-void renderBoard(RenderContext* ctx, Board* board) {
-    (void) ctx;
+void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigned int size) {
     (void) board;
+    SDL_Renderer* rend = ctx->renderer;
+
+
+    // render the board bounding box bg
+    SDL_Rect board_rect = {pos_x, pos_y, size, size};
+
+    SDL_SetRenderDrawColor(rend, 161, 132, 94, SDL_ALPHA_OPAQUE);
+    SDL_RenderFillRect(rend, &board_rect);
+
+
+    // render vertical grid lines 
+    float line_gap = size / ((float)board->cell_count + 2.0f);
+
+    SDL_FRect line_frect = {
+        .x = line_gap - LINE_WIDTH_HALF + pos_x, 
+        .y = line_gap - LINE_WIDTH_HALF + pos_y, 
+        .w = LINE_WIDTH, 
+        .h = (float)size - 2*line_gap + LINE_WIDTH
+    };
+
+    SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+    for (size_t vline = 0; vline < board->cell_count + 1; ++vline)
+    {
+        SDL_RenderFillRectF(rend, &line_frect);
+        line_frect.x += line_gap;
+    }
+
+
+    // render horizontal grid lines 
+    line_frect.x = line_gap - LINE_WIDTH_HALF + pos_x;
+    line_frect.w = line_frect.h;
+    line_frect.h = LINE_WIDTH;
+    for (size_t hline = 0; hline < board->cell_count + 1; ++hline)
+    {
+        SDL_RenderFillRectF(rend, &line_frect);
+        line_frect.y += line_gap;
+    }
 }
 
 void destroyBoard(Board* board){

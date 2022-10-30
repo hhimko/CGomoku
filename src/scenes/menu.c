@@ -44,6 +44,8 @@ void menuUpdate(uint64_t dt) {
 
 void menuRender(RenderContext* ctx) {
     renderTatamiBackground(ctx, 1.2, s_parallax_x + 0.5, s_parallax_y);
+
+    renderBoard(ctx, s_board, 100, 100, 600);
 }
 
 SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {

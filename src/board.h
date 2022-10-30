@@ -18,7 +18,7 @@ typedef enum BoardCell {
 } BoardCell;
 
 struct Board {
-    uint8_t cell_count; // number of cells in one row/column
+    size_t cell_count; // number of cells in one row/column
     BoardCell cells[BOARD_CELL_COUNT + 1][BOARD_CELL_COUNT + 1];
 };
 
@@ -26,7 +26,7 @@ Board* createBoard();
 
 void destroyBoard(Board* board);
 
-void renderBoard(RenderContext* ctx, Board* board);
+void renderBoard(RenderContext* ctx, Board* board, int x, int y, unsigned int size);
 
 /* 
  * Render a tatami mat background on screen with given zoom level and offset values from the center. 
