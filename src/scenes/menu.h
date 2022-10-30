@@ -5,6 +5,9 @@
 
 
 void menuPrepare();
+
 void setMenuSceneCallbacks(AppState* stat);
+
+void menuDestroy();
 
 #endif /* MENU_H_ */

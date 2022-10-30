@@ -30,4 +30,6 @@ struct Scene {
 
 void setScene(struct AppState* state, SceneState new_scene_state);
 
+void destroyScenes();
+
 #endif /* SCENE_H_ */

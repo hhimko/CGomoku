@@ -1,5 +1,6 @@
 #include "./menu.h"
 
+#include <assert.h>
 #include <SDL.h>
 
 // #include "../ui/button.h"
@@ -11,6 +12,7 @@ static double s_parallax_x = 0;
 static double s_parallax_y = 0;
 
 // static Button s_button = {.rect = {.x = 100, .y = 100, .w = 200, .h = 50}};
+static Board* s_board = NULL;
 
 
 void updateParallax(int32_t mouse_x, int32_t mouse_y, int win_w, int win_h) {
@@ -30,6 +32,10 @@ void updateParallax(int32_t mouse_x, int32_t mouse_y, int win_w, int win_h) {
 void menuPrepare() {
     s_parallax_x = 0;
     s_parallax_y = 0;
+
+    s_board = createBoard();
+
+    assert(s_board != NULL);
 }
 
 void menuUpdate(uint64_t dt) {
@@ -56,4 +62,8 @@ void setMenuSceneCallbacks(AppState* state) {
     state->scene.update = menuUpdate;
     state->scene.render = menuRender;
     state->scene.handle_input = menuHandleInput;
+}
+
+void menuDestroy() {
+    destroyBoard(s_board);
 }

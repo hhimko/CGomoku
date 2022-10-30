@@ -6,6 +6,25 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 
+Board* createBoard() {
+    Board* board = malloc(sizeof(Board));
+
+    if (board != NULL) {
+        board->cell_count = BOARD_CELL_COUNT;
+    }
+
+    return board;
+}
+
+void renderBoard(RenderContext* ctx, Board* board) {
+    (void) ctx;
+    (void) board;
+}
+
+void destroyBoard(Board* board){
+    free(board);
+}
+
 void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, double offset_y) {
     zoom = MAX(zoom, 1); // zoom value must be greater than 1
     offset_x = MAX(MIN(offset_x, 1), -1); // |
@@ -95,6 +114,3 @@ void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, do
     SDL_DestroyTexture(tatami_half);
 }
 
-void renderBoard(RenderContext* ctx) {
-    (void) ctx;
-}

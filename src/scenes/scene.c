@@ -20,7 +20,7 @@ inline void defaultSceneRenderCallback(RenderContext* ctx) {
 inline SDL_bool defaultSceneHandleInputCallback(SDL_Event* event, AppState* state) { 
     (void) event, state; 
     fprintf(stderr, "Default scene handleInput callback implementation has not been overriden");
-    return SDL_TRUE;
+    return SDL_FALSE;
 }
 
 void setDefaultSceneCallbacks(AppState* state) {
@@ -42,4 +42,8 @@ void setScene(AppState* state, SceneState new_scene_state) {
             assert(!"This line should never be reached.");
             break;
     }
+}
+
+void destroyScenes() {
+    menuDestroy();
 }
