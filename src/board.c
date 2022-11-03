@@ -1,6 +1,7 @@
 #include "./board.h"
 
 #include "./sdl/texture.h"
+#include "./sdl/render.h"
 
 #define LINE_WIDTH 2.0f
 #define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
@@ -24,13 +25,11 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
     (void) board;
     SDL_Renderer* rend = ctx->renderer;
 
-
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
 
     SDL_SetRenderDrawColor(rend, 161, 132, 94, SDL_ALPHA_OPAQUE);
     SDL_RenderFillRect(rend, &board_rect);
-
 
     // render vertical grid lines 
     float line_gap = size / ((float)board->cell_count + 2.0f);
@@ -49,7 +48,6 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
         line_frect.x += line_gap;
     }
 
-
     // render horizontal grid lines 
     line_frect.x = line_gap - LINE_WIDTH_HALF + pos_x;
     line_frect.w = line_frect.h;
@@ -59,6 +57,8 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
         SDL_RenderFillRectF(rend, &line_frect);
         line_frect.y += line_gap;
     }
+
+    drawCircleAA(rend, pos_x + size/2, pos_y + size/2, 100.0);
 }
 
 void destroyBoard(Board* board){
