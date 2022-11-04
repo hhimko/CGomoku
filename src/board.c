@@ -58,7 +58,7 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
         line_frect.y += line_gap;
     }
 
-    drawCircleAA(rend, pos_x + size/2, pos_y + size/2, 100.0);
+    drawFilledCircleAA(rend, pos_x + size/2, pos_y + size/2, 100.0);
 }
 
 void destroyBoard(Board* board){

@@ -5,6 +5,7 @@
 
 
 void drawCircleAA(SDL_Renderer* rend, int x, int y, double rad);
+void drawFilledCircleAA(SDL_Renderer* rend, int x, int y, double rad);
 
 /* Structure containing necessary data for general rendering. */
 typedef struct RenderContext RenderContext;

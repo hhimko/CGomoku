@@ -54,6 +54,47 @@ void drawCircleAA(SDL_Renderer* rend, int x, int y, double rad) {
     }
 }
 
+void drawFilledCircleAA(SDL_Renderer* rend, int x, int y, double rad) {
+    // Algorithm based on Xiaolin Wu's method, modified and optimized for drawing filled circles.
+    static const double SQRT2 = 1.41421356237;
+    
+    double radsq = rad*rad; 
+    int ffd = (int)round(rad / SQRT2); // 45 degree pixel coordinate
+
+    uint8_t r,g,b,a,alpha;
+    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
+
+    for (int xi = 0; xi <= ffd; ++xi) {
+        double yi = sqrt(radsq - xi*xi); // y coordinate on the circle for the iterated x
+
+        int ipart = (int)yi; // integer part of the calculated real
+        double fpart = yi - ipart; // fractional part of the calculated real
+
+        // fill the circle with scan-lines
+        SDL_SetRenderDrawColor(rend, r, g, b, a);
+        SDL_RenderDrawLine(rend, x + xi, y + ipart, x - xi, y + ipart);
+        SDL_RenderDrawLine(rend, x - xi, y - ipart, x + xi, y - ipart);
+
+        SDL_RenderDrawLine(rend, x + ipart, y + xi, x - ipart, y + xi);
+        SDL_RenderDrawLine(rend, x - ipart, y - xi, x + ipart, y - xi);
+
+        // draw the offset point in 8-symmetry
+        ipart++; 
+        alpha = (uint8_t)(fpart * 255.0);
+        SDL_SetRenderDrawColor(rend, r, g, b, alpha);
+
+        SDL_RenderDrawPoint(rend, x + xi, y + ipart);
+        SDL_RenderDrawPoint(rend, x - xi, y + ipart);
+        SDL_RenderDrawPoint(rend, x - xi, y - ipart);
+        SDL_RenderDrawPoint(rend, x + xi, y - ipart);
+
+        SDL_RenderDrawPoint(rend, x + ipart, y + xi);
+        SDL_RenderDrawPoint(rend, x - ipart, y + xi);
+        SDL_RenderDrawPoint(rend, x - ipart, y - xi);
+        SDL_RenderDrawPoint(rend, x + ipart, y - xi);
+    }
+}
+
 RenderContext* createRenderContext(int win_w, int win_h) {
     RenderContext* ctx = malloc(sizeof(RenderContext));
 
