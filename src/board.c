@@ -1,11 +1,14 @@
 #include "./board.h"
 
+#include <math.h>
+
 #include "./sdl/texture.h"
 #include "./sdl/render.h"
 
 #define LINE_WIDTH 2.0f
 #define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
-#define BORDER_WIDTH 4.0f
+#define DOT_RADIUS 4.0f
+#define BORDER_WIDTH 6.0f
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -22,19 +25,17 @@ Board* createBoard() {
 }
 
 void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigned int size) {
-    (void) board;
     SDL_Renderer* rend = ctx->renderer;
 
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
-
     SDL_SetRenderDrawColor(rend, 161, 132, 94, SDL_ALPHA_OPAQUE);
     SDL_RenderFillRect(rend, &board_rect);
 
     // render vertical grid lines 
     float line_gap = size / ((float)board->cell_count + 2.0f);
 
-    SDL_FRect line_frect = {
+    SDL_FRect frect = {
         .x = line_gap - LINE_WIDTH_HALF + pos_x, 
         .y = line_gap - LINE_WIDTH_HALF + pos_y, 
         .w = LINE_WIDTH, 
@@ -44,21 +45,37 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
     SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     for (size_t vline = 0; vline < board->cell_count + 1; ++vline)
     {
-        SDL_RenderFillRectF(rend, &line_frect);
-        line_frect.x += line_gap;
+        SDL_RenderFillRectF(rend, &frect);
+        frect.x += line_gap;
     }
 
     // render horizontal grid lines 
-    line_frect.x = line_gap - LINE_WIDTH_HALF + pos_x;
-    line_frect.w = line_frect.h;
-    line_frect.h = LINE_WIDTH;
+    frect.x = line_gap - LINE_WIDTH_HALF + pos_x;
+    frect.w = frect.h;
+    frect.h = LINE_WIDTH;
     for (size_t hline = 0; hline < board->cell_count + 1; ++hline)
     {
-        SDL_RenderFillRectF(rend, &line_frect);
-        line_frect.y += line_gap;
+        SDL_RenderFillRectF(rend, &frect);
+        frect.y += line_gap;
     }
 
-    drawFilledCircleAA(rend, pos_x + size/2, pos_y + size/2, 100.0);
+    // render border lines
+    frect.x = line_gap - BORDER_WIDTH + pos_x;
+    frect.y = line_gap - BORDER_WIDTH + pos_y;
+    frect.w = (float)size - 2*line_gap + 2*BORDER_WIDTH;
+    frect.h = (float)size - 2*line_gap + 2*BORDER_WIDTH;    
+    drawFRectBorder(rend, &frect, BORDER_WIDTH, BORDER_TYPE_OUTER);
+
+    // render dots 
+    int cx = (int)roundf(pos_x + size / 2.0f - LINE_WIDTH_HALF);
+    int cy = (int)roundf(pos_y + size / 2.0f - LINE_WIDTH_HALF);
+    int dot_offset = (int)roundf(line_gap * 4); // ofset from center dot
+
+    drawFilledCircleAA(rend, cx, cy, 4);
+    drawFilledCircleAA(rend, cx + dot_offset, cy + dot_offset, 4);
+    drawFilledCircleAA(rend, cx - dot_offset, cy + dot_offset, 4);
+    drawFilledCircleAA(rend, cx - dot_offset, cy - dot_offset, 4);
+    drawFilledCircleAA(rend, cx + dot_offset, cy - dot_offset, 4);
 }
 
 void destroyBoard(Board* board){

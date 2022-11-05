@@ -4,6 +4,34 @@
 #include <assert.h>
 
 
+void drawFRectBorder(SDL_Renderer* rend, SDL_FRect* frect, float thickness, BorderType border_type) {
+    SDL_FRect line_frect;
+
+    float off = thickness * (float)border_type / 2.0f; // offset relies on BorderType integer values 
+    float off2 = off * 2.0f;
+
+    // top
+    line_frect.x = frect->x - off;
+    line_frect.y = frect->y - off;
+    line_frect.w = frect->w + off2;
+    line_frect.h = thickness;
+    SDL_RenderFillRectF(rend, &line_frect);
+
+    // bottom
+    line_frect.y += frect->h + off2 - thickness; 
+    SDL_RenderFillRectF(rend, &line_frect);
+
+    // left
+    line_frect.y = frect->y - off;
+    line_frect.w = thickness;
+    line_frect.h = frect->w + off2;
+    SDL_RenderFillRectF(rend, &line_frect);
+
+    // right
+    line_frect.x += frect->w + off2 - thickness;
+    SDL_RenderFillRectF(rend, &line_frect);
+}
+
 void drawCircleAA(SDL_Renderer* rend, int x, int y, double rad) {
     /* 
      * Slightly modified algorithm based on Xiaolin Wu's method. 
