@@ -170,4 +170,3 @@ void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, do
     SDL_DestroyTexture(tatami);
     SDL_DestroyTexture(tatami_half);
 }
-

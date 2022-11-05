@@ -39,12 +39,13 @@ int handleEvents(AppState* state) {
     return 0;
 }
 
-void mainloop(AppState* state) {
+void mainloop(AppState* state, SDL_Window* win) {
     SDL_bool running = SDL_TRUE;
     RenderContext* context = state->context; 
     SDL_Renderer* renderer = context->renderer; 
 
     const uint64_t ms_per_frame = (uint64_t)round(1000.0 / (double)state->fps_cap);
+    char fpsbuffer[9];
 
     uint64_t f_start = SDL_GetTicks64() - ms_per_frame;
     while (running)
@@ -54,8 +55,9 @@ void mainloop(AppState* state) {
         f_start = f_current;
 
         const uint64_t fps = (uint64_t)round(1000.0 / (double)f_elapsed);
-        printf("%lld\n", fps);
-
+        snprintf(fpsbuffer, 9, "fps: %lld\n", fps);
+        SDL_SetWindowTitle(win, fpsbuffer);
+        
         // handle user input
         if (handleEvents(state) < 0) {
             running = SDL_FALSE;
@@ -93,7 +95,7 @@ int Gomoku_run(int argc, char* argv[]) {
 
     uint16_t fps = DEFAULT_FPS;
     AppState* state = createAppState(context, fps);
-    mainloop(state);
+    mainloop(state, window);
 
     // free up resources after the mainloop quits
     destroyScenes();
