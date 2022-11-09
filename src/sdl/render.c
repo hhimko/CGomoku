@@ -162,10 +162,16 @@ void drawCircleBorderAA(SDL_Renderer* rend, int x, int y, double rad, double thi
 
         // fill the circle with scan-lines
         SDL_SetRenderDrawColor(rend, r, g, b, a);
+
         SDL_RenderDrawLine(rend, x + xi, y + oipart, x + xi, y + iipart);
         SDL_RenderDrawLine(rend, x - xi, y + oipart, x - xi, y + iipart);
         SDL_RenderDrawLine(rend, x + xi, y - oipart, x + xi, y - iipart);
         SDL_RenderDrawLine(rend, x - xi, y - oipart, x - xi, y - iipart);
+
+        SDL_RenderDrawLine(rend, x + oipart, y + xi, x + iipart, y + xi);
+        SDL_RenderDrawLine(rend, x - oipart, y + xi, x - iipart, y + xi);
+        SDL_RenderDrawLine(rend, x + oipart, y - xi, x + iipart, y - xi);
+        SDL_RenderDrawLine(rend, x - oipart, y - xi, x - iipart, y - xi);
 
         // draw the outer offset point in 8-symmetry
         oipart++; 
