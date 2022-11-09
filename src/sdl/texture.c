@@ -113,3 +113,65 @@ SDL_Texture* generateSeigaihaTexture(SDL_Renderer* rend, uint32_t size, uint8_t 
     SDL_DestroyTexture(tex);
     return NULL;
 }
+
+void renderTextureRepeat(SDL_Renderer* rend, SDL_Texture* tex, const SDL_Rect* dstrect) {
+    int tex_w, tex_h;
+    
+    if (getTextureSize(tex, &tex_w, &tex_h) < 0) {
+        fprintf(stderr, "Failed to query texture size. \nSDL_Error: %s\n", SDL_GetError());
+        return;
+    }
+
+    int x, y, w, h;
+    x = dstrect->x;
+    y = dstrect->y;
+    w = dstrect->w;
+    h = dstrect->h;
+
+    SDL_Rect dest = { .x = x, .y = y, .w = tex_w, .h = tex_h };
+    int xiters = (int)(w / tex_w);
+    int yiters = (int)(h / tex_h);
+
+    int remaining_w = w - tex_w * xiters;
+    int remaining_h = h - tex_h * yiters;
+    SDL_Rect src = { .x = 0, .y = 0, .w = remaining_w, .h = tex_h };
+
+    for (int yi = 0; yi < yiters; ++yi) {
+        dest.x = x;
+
+        for (int xi = 0; xi < xiters; ++xi) {
+            SDL_RenderCopy(rend, tex, NULL, &dest);
+            dest.x += tex_w;
+        }
+
+        // render the remaining texture, cut in width (right-most column)
+        if (remaining_w > 0) {
+            dest.w = remaining_w;
+            SDL_RenderCopy(rend, tex, &src, &dest);
+            dest.w = tex_w;
+        }
+
+        dest.y += tex_h;
+    }
+
+    // render the remaining texture, cut in height (bottom row)
+    if (remaining_h > 0) {
+        dest.x = x;
+        dest.h = remaining_h;
+
+        src.w = tex_w;
+        src.h = remaining_h;
+
+        for (int xi = 0; xi < xiters; ++xi) {
+            SDL_RenderCopy(rend, tex, &src, &dest);
+            dest.x += tex_w;
+        }
+
+        // render the remaining texture, cut in both width and height (bottom-right corner)
+        if (remaining_w > 0) {
+            src.w = remaining_w;
+            dest.w = remaining_w;
+            SDL_RenderCopy(rend, tex, &src, &dest);
+        }
+    }
+}

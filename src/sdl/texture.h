@@ -20,4 +20,6 @@ SDL_Texture* loadTextureBMP(SDL_Renderer* rend, const char* const file);
 
 SDL_Texture* generateSeigaihaTexture(SDL_Renderer* rend, uint32_t size, uint8_t ring_count, double ring_thickness, SDL_Color* bg_color,  SDL_Color* fg_color);
 
+void renderTextureRepeat(SDL_Renderer* rend, SDL_Texture* tex, const SDL_Rect* dstrect);
+
 #endif /* TEXTURE_H_ */
