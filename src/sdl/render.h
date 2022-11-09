@@ -18,6 +18,7 @@ void drawFRectBorder(SDL_Renderer* rend, SDL_FRect* frect, float thickness, Bord
 
 void drawCircleAA(SDL_Renderer* rend, int x, int y, double rad);
 void drawFilledCircleAA(SDL_Renderer* rend, int x, int y, double rad);
+void drawCircleBorderAA(SDL_Renderer* rend, int x, int y, double rad, double thickness, BorderType border_type);
 
 /* Structure containing necessary data for general rendering. */
 typedef struct RenderContext RenderContext;
