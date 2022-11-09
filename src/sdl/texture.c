@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "./render.h"
+
 
 SDL_Texture* loadMissingTexture(SDL_Renderer* rend){
     SDL_Texture* tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 2, 2);
@@ -41,4 +43,73 @@ SDL_Texture* loadTextureBMP(SDL_Renderer* rend, const char* const file) {
     SDL_FreeSurface(surf); 
 
     return tex;
+}
+
+void __drawSeigaihaSegemntRings(SDL_Renderer* rend, int x, int y, double rad, uint8_t ring_count, double ring_thickness) {
+    double radoff = rad / ring_count; 
+
+    for (int ring = 0; ring < ring_count; ++ring) {
+        drawCircleBorderAA(rend, x, y, rad, ring_thickness, BORDER_TYPE_INNER);
+
+        rad -= radoff;
+    }
+}
+
+SDL_Texture* generateSeigaihaTexture(SDL_Renderer* rend, uint32_t size, uint8_t ring_count, double ring_thickness, SDL_Color* bg_color,  SDL_Color* fg_color) {
+    SDL_Texture* tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, size * 2, size);
+
+    uint8_t r,g,b,a;
+    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
+
+    if (tex != NULL && SDL_SetRenderTarget(rend, tex) >= 0) {
+        uint8_t bg_r, bg_g, bg_b; // |
+        uint8_t fg_r, fg_g, fg_b; // | alpha is ignored
+
+        double thickness = size * ring_thickness;
+        double rad = (double)size;
+        
+        bg_r = bg_color->r;
+        bg_g = bg_color->g;
+        bg_b = bg_color->b;
+
+        fg_r = fg_color->r;
+        fg_g = fg_color->g;
+        fg_b = fg_color->b;
+
+        SDL_SetRenderDrawColor(rend, bg_r, bg_g, bg_b, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(rend);
+
+        // top corners
+        SDL_SetRenderDrawColor(rend, fg_r, fg_g, fg_b, SDL_ALPHA_OPAQUE);
+        __drawSeigaihaSegemntRings(rend, 0, size / 2, rad, ring_count, thickness);
+        __drawSeigaihaSegemntRings(rend, size * 2, size / 2, rad, ring_count, thickness);
+        
+        // center
+        SDL_SetRenderDrawColor(rend, bg_r, bg_g, bg_b, SDL_ALPHA_OPAQUE);
+        drawFilledCircleAA(rend, size, size, rad - thickness);
+
+        SDL_SetRenderDrawColor(rend, fg_r, fg_g, fg_b, SDL_ALPHA_OPAQUE);
+        __drawSeigaihaSegemntRings(rend, size, size, rad, ring_count, thickness);
+
+        // bottom corners 
+        SDL_SetRenderDrawColor(rend, bg_r, bg_g, bg_b, SDL_ALPHA_OPAQUE);
+        drawFilledCircleAA(rend, 0, size + size / 2, rad - thickness);
+        drawFilledCircleAA(rend, size * 2, size + size / 2, rad - thickness);
+
+        SDL_SetRenderDrawColor(rend, fg_r, fg_g, fg_b, SDL_ALPHA_OPAQUE);
+        __drawSeigaihaSegemntRings(rend, 0, size + size / 2, rad, ring_count, thickness);
+        __drawSeigaihaSegemntRings(rend, size * 2, size + size / 2, rad, ring_count, thickness);
+
+
+        SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
+
+        // detach texture from renderer 
+        if (SDL_SetRenderTarget(rend, NULL) >= 0) {
+            return tex;
+        }
+    }
+
+    fprintf(stderr, "Failed to generate the \"seigaiha\" texture. \nSDL_Error: %s\n", SDL_GetError());
+    SDL_DestroyTexture(tex);
+    return NULL;
 }

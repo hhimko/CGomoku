@@ -140,7 +140,7 @@ void drawCircleBorderAA(SDL_Renderer* rend, int x, int y, double rad, double thi
     // precalculate the last y coordinate on the inner circle
     const double maxiyi = sqrt(radisq - ffdi*ffdi);
 
-    uint8_t r,g,b,a=255,alpha;
+    uint8_t r,g,b,a,alpha;
     SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
 
     for (int xi = 0; xi <= ffdo; ++xi) {
