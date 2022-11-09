@@ -29,8 +29,11 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
 
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
+
+    SDL_Texture* tex = loadTextureBMP(rend, "../assets/board.bmp");
     SDL_SetRenderDrawColor(rend, 161, 132, 94, SDL_ALPHA_OPAQUE);
-    SDL_RenderFillRect(rend, &board_rect);
+    SDL_RenderCopy(rend, tex, NULL, &board_rect);
+    SDL_DestroyTexture(tex);
 
     // render vertical grid lines 
     float line_gap = size / ((float)board->cell_count + 2.0f);
