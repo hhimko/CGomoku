@@ -17,10 +17,11 @@ target_compile_options(${BIN_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
 target_compile_options(${BIN_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>)
 
 # Link CMake modules
-# list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Add SDL2 libs
 if(WIN32)
+    
     find_package(SDL2 QUIET)
 
     # Fall back to looking for SDL2 locally
@@ -41,9 +42,13 @@ if(WIN32)
             # Support both 32 and 64 bit builds
             if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
                 set(SDL2_LIBRARIES ${INCLUDE_DIR}/lib/x64/SDL2.lib;${INCLUDE_DIR}/lib/x64/SDL2main.lib)
+                file(COPY ${INCLUDE_DIR}/lib/x64/SDL2.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+                file(COPY ${INCLUDE_DIR}/lib/x64/SDL2.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
             else()
                 set(SDL2_LIBRARIES ${INCLUDE_DIR}/lib/x86/SDL2.lib;${INCLUDE_DIR}/lib/x86/SDL2main.lib)
-            endif()
+                file(COPY ${INCLUDE_DIR}/lib/x64/SDL2.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+                file(COPY ${INCLUDE_DIR}/lib/x64/SDL2.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+                endif()
         endif() # if(MINGW)
         string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
     endif() # if(NOT SDL2_FOUND)
@@ -56,3 +61,5 @@ target_include_directories(${BIN_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 
 # Copy asset directory to executable path
 file(COPY assets DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+message("${CMAKE_BUILD_TYPE}")
