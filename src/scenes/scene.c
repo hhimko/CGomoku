@@ -30,6 +30,8 @@ void setDefaultSceneCallbacks(AppState* state) {
 }
 
 void setScene(AppState* state, SceneState new_scene_state) {
+    if (state->scene.destroy != NULL) // scene destroy callback has to be null-initialized before setScene
+        state->scene.destroy(); 
     state->scene.state = new_scene_state;
     setDefaultSceneCallbacks(state);
 
@@ -42,8 +44,4 @@ void setScene(AppState* state, SceneState new_scene_state) {
             assert(!"This line should never be reached.");
             break;
     }
-}
-
-void destroyScenes() {
-    menuDestroy();
 }

@@ -20,16 +20,16 @@ typedef struct Scene Scene;
 typedef void (*sceneUpdateCallback)(uint64_t dt);
 typedef void (*sceneRenderCallback)(RenderContext* ctx);
 typedef SDL_bool (*sceneHandleInputCallback)(SDL_Event* event, struct AppState* state);
+typedef void (*sceneDestroyCallback)();
 
 struct Scene {
     SceneState state;
     sceneUpdateCallback update;
     sceneRenderCallback render;
     sceneHandleInputCallback handle_input;
+    sceneDestroyCallback destroy;
 };
 
 void setScene(struct AppState* state, SceneState new_scene_state);
-
-void destroyScenes();
 
 #endif /* SCENE_H_ */

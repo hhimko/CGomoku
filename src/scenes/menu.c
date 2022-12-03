@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 // #include "../ui/button.h"
+#include "../sdl/texture.h"
 #include "../board.h"
 #include "../app.h"
 
@@ -46,6 +47,15 @@ void menuRender(RenderContext* ctx) {
     renderTatamiBackground(ctx, 1.2, s_parallax_x + 0.5, s_parallax_y);
 
     renderBoard(ctx, s_board, 100, 100, 600);
+
+    SDL_Color bg = { .r=0xFF, .g=0xFF, .b=0xFF };
+    SDL_Color fg = { .r=0x00, .g=0x00, .b=0x00 };
+    SDL_Texture* tex = generateSeigaihaTexture(ctx->renderer, 50, 3, 0.1, &bg, &fg);
+
+    SDL_Rect rect = { .x=800, .y=100, .w=820, .h=243 };
+    renderTextureRepeat(ctx->renderer, tex, &rect);
+
+    SDL_DestroyTexture(tex);
 }
 
 SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
@@ -60,12 +70,13 @@ SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
     return SDL_FALSE;
 }
 
+void menuDestroy() {
+    destroyBoard(s_board);
+}
+
 void setMenuSceneCallbacks(AppState* state) {
     state->scene.update = menuUpdate;
     state->scene.render = menuRender;
     state->scene.handle_input = menuHandleInput;
-}
-
-void menuDestroy() {
-    destroyBoard(s_board);
+    state->scene.destroy = menuDestroy;
 }

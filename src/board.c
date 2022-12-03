@@ -30,8 +30,8 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
 
-    SDL_Texture* tex = loadTextureBMP(rend, "../assets/board.bmp");
-    SDL_SetRenderDrawColor(rend, 161, 132, 94, SDL_ALPHA_OPAQUE);
+    SDL_Texture* tex = generateSolidTexture(rend, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
+    // SDL_Texture* tex = loadTextureBMP(rend, "../assets/board.bmp");
     SDL_RenderCopy(rend, tex, NULL, &board_rect);
     SDL_DestroyTexture(tex);
 

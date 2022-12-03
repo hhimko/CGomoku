@@ -45,6 +45,24 @@ SDL_Texture* loadTextureBMP(SDL_Renderer* rend, const char* const file) {
     return tex;
 }
 
+SDL_Texture* generateSolidTexture(SDL_Renderer* rend, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    SDL_Texture* tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 1, 1);
+    
+    if (tex != NULL && SDL_SetRenderTarget(rend, tex) >= 0) {
+        SDL_SetRenderDrawColor(rend, r, g, b, a);
+        SDL_RenderDrawPoint(rend, 0, 0);
+
+        // detach texture from renderer 
+        if (SDL_SetRenderTarget(rend, NULL) >= 0) {
+            return tex;
+        }
+    }
+
+    fprintf(stderr, "Failed to generate solid color texture. \nSDL_Error: %s\n", SDL_GetError());
+    SDL_DestroyTexture(tex);
+    return NULL;
+}
+
 void __drawSeigaihaSegemntRings(SDL_Renderer* rend, int x, int y, double rad, uint8_t ring_count, double ring_thickness) {
     double radoff = rad / ring_count; 
 

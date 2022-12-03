@@ -22,7 +22,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # Add SDL2 libs
 if(WIN32)
     
-    find_package(SDL2 QUIET)
+    # find_package(SDL2 QUIET)
+    find_package(SDL2main QUIET)
 
     # Fall back to looking for SDL2 locally
     if(NOT SDL2_FOUND)
@@ -61,5 +62,3 @@ target_include_directories(${BIN_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 
 # Copy asset directory to executable path
 file(COPY assets DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-message("${CMAKE_BUILD_TYPE}")

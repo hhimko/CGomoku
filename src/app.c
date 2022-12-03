@@ -17,6 +17,7 @@ AppState* createAppState(RenderContext* ctx, uint16_t fps_cap) {
     if (state != NULL) {
         state->context = ctx;
         state->fps_cap = fps_cap;
+        state->scene.destroy = NULL; // scene destroy callback has to be null-initialized before setScene
         setScene(state, SCENE_MENU); // initializes scene to main menu
     }
 
@@ -98,7 +99,7 @@ int Gomoku_run(int argc, char* argv[]) {
     mainloop(state, window);
 
     // free up resources after the mainloop quits
-    destroyScenes();
+    state->scene.destroy();
     destroyAppState(state);
     quitSDL(context, window);
     destroyRenderContext(context);
