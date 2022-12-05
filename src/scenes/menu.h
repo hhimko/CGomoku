@@ -4,9 +4,9 @@
 #include "../app.h"
 
 
-void menuPrepare();
+void menuPrepare(AppState* state);
 
-void setMenuSceneCallbacks(AppState* stat);
+void setMenuSceneCallbacks(AppState* state);
 
 void menuDestroy();
 

@@ -37,7 +37,7 @@ void setScene(AppState* state, SceneState new_scene_state) {
 
     switch (new_scene_state) {
         case SCENE_MENU:
-            menuPrepare();
+            menuPrepare(state);
             setMenuSceneCallbacks(state);
             break;
         default:

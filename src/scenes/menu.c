@@ -1,6 +1,7 @@
 #include "./menu.h"
 
 #include <assert.h>
+#include <math.h>
 #include <SDL.h>
 
 // #include "../ui/button.h"
@@ -8,54 +9,61 @@
 #include "../board.h"
 #include "../app.h"
 
+#define SEIGAIHA_RADIUS 80
+#define BACKGROUND_ANIMATION_STEP 0.0003
 
-static double s_parallax_x = 0;
-static double s_parallax_y = 0;
+
+static int s_parallax_x = 0;
+static int s_parallax_y = 0;
+
+static double s_background_offset = 0.0;
+static SDL_Texture* s_backgroundTexture = NULL;
 
 // static Button s_button = {.rect = {.x = 100, .y = 100, .w = 200, .h = 50}};
-static Board* s_board = NULL;
 
 
 void updateParallax(int32_t mouse_x, int32_t mouse_y, int win_w, int win_h) {
-    s_parallax_x = (mouse_x / (double)win_w) * 2 - 1; // |
-    s_parallax_y = (mouse_y / (double)win_h) * 2 - 1; // | values normalized into [-1, 1] range
+    double xnorm = mouse_x / (double)win_w;
+    double ynorm = mouse_y / (double)win_h;
 
-    // rescale the longer dimension to remap the parallax effect area to a square
-    if (win_w > win_h) {
-        double factor = 1. - (win_w - win_h) / (double)win_h;
-        s_parallax_y *= factor;
-    } else {
-        double factor = 1. - (win_h - win_w) / (double)win_w;
-        s_parallax_x *= factor;
-    }
+    s_parallax_x = (int)round(2*SEIGAIHA_RADIUS*xnorm);
+    s_parallax_y = (int)round(SEIGAIHA_RADIUS*ynorm);
 }
 
-void menuPrepare() {
+
+void renderMenuBackground(RenderContext* ctx) {
+    int animation_offset = 2*SEIGAIHA_RADIUS - (int)round(2*SEIGAIHA_RADIUS*s_background_offset);
+
+    SDL_Rect rect = { 
+        .x = -animation_offset - s_parallax_x,
+        .y = -animation_offset - s_parallax_y, 
+        .w = ctx->win_w + animation_offset + s_parallax_x, 
+        .h = ctx->win_h + animation_offset + s_parallax_y
+    };
+
+    renderTextureRepeat(ctx->renderer, s_backgroundTexture, &rect);
+}
+
+
+void menuPrepare(AppState* state) {
     s_parallax_x = 0;
     s_parallax_y = 0;
 
-    s_board = createBoard();
+    s_background_offset = 0.0;
 
-    assert(s_board != NULL);
+    SDL_Color bg = { .r=0x4B, .g=0x67, .b=0x9C };
+    SDL_Color fg = { .r=0x2A, .g=0x4B, .b=0x74 };
+    s_backgroundTexture = generateSeigaihaTexture(state->context->renderer, SEIGAIHA_RADIUS, 3, 0.1, &bg, &fg);
+
+    assert(s_backgroundTexture != NULL);
 }
 
 void menuUpdate(uint64_t dt) {
-    (void) dt;
+    s_background_offset = fmod(s_background_offset + BACKGROUND_ANIMATION_STEP*dt, 1.0);
 }
 
 void menuRender(RenderContext* ctx) {
-    renderTatamiBackground(ctx, 1.2, s_parallax_x + 0.5, s_parallax_y);
-
-    renderBoard(ctx, s_board, 100, 100, 600);
-
-    SDL_Color bg = { .r=0xFF, .g=0xFF, .b=0xFF };
-    SDL_Color fg = { .r=0x00, .g=0x00, .b=0x00 };
-    SDL_Texture* tex = generateSeigaihaTexture(ctx->renderer, 50, 3, 0.1, &bg, &fg);
-
-    SDL_Rect rect = { .x=800, .y=100, .w=820, .h=243 };
-    renderTextureRepeat(ctx->renderer, tex, &rect);
-
-    SDL_DestroyTexture(tex);
+    renderMenuBackground(ctx);
 }
 
 SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
@@ -71,7 +79,7 @@ SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
 }
 
 void menuDestroy() {
-    destroyBoard(s_board);
+    SDL_DestroyTexture(s_backgroundTexture);
 }
 
 void setMenuSceneCallbacks(AppState* state) {

@@ -34,4 +34,4 @@ void renderBoard(RenderContext* ctx, Board* board, int x, int y, unsigned int si
  */
 void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, double offset_y);
 
-#endif BOARD_H_
+#endif /* BOARD_H_ */
