@@ -5,6 +5,7 @@
 #include <SDL.h>
 
 #include "./scenes/scene.h"
+#include "./ui.h"
 
 #define DEFAULT_FPS 60
 #define DEFAULT_SCREEN_WIDTH 1920
@@ -25,6 +26,7 @@ AppState* createAppState(RenderContext* ctx, uint16_t fps_cap) {
 }
 
 void destroyAppState(AppState* state) {
+    state->scene.destroy();
     free(state);
 }
 
@@ -65,6 +67,7 @@ void mainloop(AppState* state, SDL_Window* win) {
         }
 
         // update logic state
+        updateUI(f_elapsed);
         state->scene.update(f_elapsed);
 
         // render game to screen
@@ -91,6 +94,16 @@ int Gomoku_run(int argc, char* argv[]) {
 
     if (initSDL(context, &window) < 0) {
         fprintf(stderr, "Failed to initialize SDL.\n SDL_Error: %s\n", SDL_GetError()); 
+        quitSDL(context, window);
+        destroyRenderContext(context);
+        return -1;
+    }
+    
+    if (initializeUI() < 0) {
+        fprintf(stderr, "Failed to initialize UI.\n"); 
+        destroyUI();
+        quitSDL(context, window);
+        destroyRenderContext(context);
         return -1;
     }
 
@@ -99,8 +112,8 @@ int Gomoku_run(int argc, char* argv[]) {
     mainloop(state, window);
 
     // free up resources after the mainloop quits
-    state->scene.destroy();
     destroyAppState(state);
+    destroyUI();
     quitSDL(context, window);
     destroyRenderContext(context);
 

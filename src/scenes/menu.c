@@ -4,10 +4,10 @@
 #include <math.h>
 #include <SDL.h>
 
-// #include "../ui/button.h"
 #include "../sdl/texture.h"
 #include "../board.h"
 #include "../app.h"
+#include "../ui.h"
 
 #define SEIGAIHA_RADIUS 80
 #define BACKGROUND_ANIMATION_STEP 0.0003
@@ -17,7 +17,7 @@ static int s_parallax_x = 0;
 static int s_parallax_y = 0;
 
 static double s_background_offset = 0.0;
-static SDL_Texture* s_backgroundTexture = NULL;
+static SDL_Texture* s_background_texture = NULL;
 
 // static Button s_button = {.rect = {.x = 100, .y = 100, .w = 200, .h = 50}};
 
@@ -30,7 +30,6 @@ void updateParallax(int32_t mouse_x, int32_t mouse_y, int win_w, int win_h) {
     s_parallax_y = (int)round(SEIGAIHA_RADIUS*ynorm);
 }
 
-
 void renderMenuBackground(RenderContext* ctx) {
     int animation_offset = 2*SEIGAIHA_RADIUS - (int)round(2*SEIGAIHA_RADIUS*s_background_offset);
 
@@ -41,9 +40,8 @@ void renderMenuBackground(RenderContext* ctx) {
         .h = ctx->win_h + animation_offset + s_parallax_y
     };
 
-    renderTextureRepeat(ctx->renderer, s_backgroundTexture, &rect);
+    renderTextureRepeat(ctx->renderer, s_background_texture, &rect);
 }
-
 
 void menuPrepare(AppState* state) {
     s_parallax_x = 0;
@@ -53,17 +51,23 @@ void menuPrepare(AppState* state) {
 
     SDL_Color bg = { .r=0x4B, .g=0x67, .b=0x9C };
     SDL_Color fg = { .r=0x2A, .g=0x4B, .b=0x74 };
-    s_backgroundTexture = generateSeigaihaTexture(state->context->renderer, SEIGAIHA_RADIUS, 3, 0.1, &bg, &fg);
+    s_background_texture = generateSeigaihaTexture(state->context->renderer, SEIGAIHA_RADIUS, 3, 0.1, &bg, &fg);
 
-    assert(s_backgroundTexture != NULL);
+    assert(s_background_texture != NULL);
 }
 
 void menuUpdate(uint64_t dt) {
-    s_background_offset = fmod(s_background_offset + BACKGROUND_ANIMATION_STEP*dt, 1.0);
+    s_background_offset = s_background_offset + BACKGROUND_ANIMATION_STEP*dt;
+    if (s_background_offset >= 1.0) 
+        s_background_offset -= (int)s_background_offset;
 }
 
 void menuRender(RenderContext* ctx) {
     renderMenuBackground(ctx);
+
+    SDL_Rect rect = {.x = 100, .y = 100, .w = 200, .h = 50};
+
+    renderSelectionCursor(ctx->renderer, &rect);
 }
 
 SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
@@ -79,7 +83,7 @@ SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
 }
 
 void menuDestroy() {
-    SDL_DestroyTexture(s_backgroundTexture);
+    SDL_DestroyTexture(s_background_texture);
 }
 
 void setMenuSceneCallbacks(AppState* state) {
