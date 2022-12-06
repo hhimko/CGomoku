@@ -9,9 +9,9 @@
 
 #define CLAMP(a, b, x) (((x) < (a)) ? (a) : (((x) > (b)) ? (b) : (x)))
 
-#define SMOOTHSTEP_RESOLUTION 50
-#define CURSOR_ANIMATION_STEP 0.001
-#define CURSOR_ANIMATION_STRENGTH 10.0f
+#define SMOOTHSTEP_RESOLUTION 100
+#define CURSOR_ANIMATION_STEP 0.0005
+#define CURSOR_ANIMATION_STRENGTH 15.0f
 
 
 static double* __s_smoothstep_arr = NULL; 
@@ -20,9 +20,13 @@ static double s_cursor_animation_t = 0.0;
 
 double smoothstep(double x) {
     int t = (int)(x * SMOOTHSTEP_RESOLUTION + 0.5);
-    return __s_smoothstep_arr[CLAMP(0, SMOOTHSTEP_RESOLUTION, t)];
+    return __s_smoothstep_arr[CLAMP(0, SMOOTHSTEP_RESOLUTION - 1, t)];
 }
 
+double smoothstep_inout(double x) {
+    int t = (int)((1 - fabs((x - 0.5)*2)) * SMOOTHSTEP_RESOLUTION + 0.5);
+    return __s_smoothstep_arr[CLAMP(0, SMOOTHSTEP_RESOLUTION - 1, t)];
+}
 
 int precomputeSmoothstep() {
     __s_smoothstep_arr = malloc(sizeof(double) * SMOOTHSTEP_RESOLUTION);
@@ -39,9 +43,9 @@ int precomputeSmoothstep() {
 
 
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
-    static const float thickness = 10.0f; 
+    static const float thickness = 7.0f; 
     static const float length = 30; 
-    float offset = 25.0f + CURSOR_ANIMATION_STRENGTH * (float)smoothstep(s_cursor_animation_t); 
+    float offset = 25.0f + CURSOR_ANIMATION_STRENGTH * (float)smoothstep_inout(s_cursor_animation_t); 
 
     uint8_t r,g,b,a;
     SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
@@ -56,34 +60,34 @@ void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
     };
 
     // top-left
-    SDL_RenderFillRectF(rend, &drawrect);
+    drawFilledFRect(rend, &drawrect);
     drawrect.w = length;
     drawrect.h = thickness;
-    SDL_RenderFillRectF(rend, &drawrect);
+    drawFilledFRect(rend, &drawrect);
 
     // top-right
     drawrect.x = rect->x + rect->w + offset + thickness;
     drawrect.w = -length;
-    SDL_RenderFillRectF(rend, &drawrect);
+    drawFilledFRect(rend, &drawrect);
     drawrect.w = -thickness;
     drawrect.h = length;
-    SDL_RenderFillRectF(rend, &drawrect);    
+    drawFilledFRect(rend, &drawrect);    
 
     // bottom-right
     drawrect.y = rect->y + rect->h + offset + thickness;
     drawrect.h = -length;
-    SDL_RenderFillRectF(rend, &drawrect);
+    drawFilledFRect(rend, &drawrect);
     drawrect.w = -length;
     drawrect.h = -thickness;
-    SDL_RenderFillRectF(rend, &drawrect);
+    drawFilledFRect(rend, &drawrect);
     
     // bottom-left
     drawrect.x = rect->x - offset - thickness,
     drawrect.w = length;
-    SDL_RenderFillRectF(rend, &drawrect);
+    drawFilledFRect(rend, &drawrect);
     drawrect.w = thickness;
     drawrect.h = -length;
-    SDL_RenderFillRectF(rend, &drawrect);
+    drawFilledFRect(rend, &drawrect);
 
     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
 }

@@ -26,6 +26,7 @@ typedef enum {
     BORDER_TYPE_OUTER = 2
 } BorderType;
 
+void drawFilledFRect(SDL_Renderer* rend, SDL_FRect* frect);
 void drawFRectBorder(SDL_Renderer* rend, SDL_FRect* frect, float thickness, BorderType border_type);
 
 void drawCircleAA(SDL_Renderer* rend, int x, int y, double rad);

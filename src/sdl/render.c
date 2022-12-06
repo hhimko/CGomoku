@@ -6,17 +6,62 @@
 #define SQRT2 1.41421356237
 
 
-void drawFRectBorder(SDL_Renderer* rend, SDL_FRect* frect, float thickness, BorderType border_type) {
-    SDL_FRect line_frect;
+void drawFilledFRect(SDL_Renderer* rend, SDL_FRect* frect) {
+    uint8_t r,g,b,a,alpha;
+    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
 
-    float off = thickness * (float)border_type / 2.0f; // offset relies on BorderType integer values 
-    float off2 = off * 2.0f;
+    float sx = frect->w < 0 ? frect->x + frect->w : frect->x;
+    float sy = frect->h < 0 ? frect->y + frect->h : frect->y;
+    float w = frect->w < 0 ? -frect->w : frect->w;
+    float h = frect->h < 0 ? -frect->h : frect->h;
+    float ex = sx + w;
+    float ey = sy + h;
 
     // top
-    line_frect.x = frect->x - off;
-    line_frect.y = frect->y - off;
-    line_frect.w = frect->w + off2;
-    line_frect.h = thickness;
+    alpha = (uint8_t)((1.0 - (sy - (int)sy)) * 255.0);
+    SDL_SetRenderDrawColor(rend, r, g, b, alpha);
+    SDL_RenderDrawLine(rend, (int)sx - 1, (int)sy - 1, (int)ex, (int)sy - 1);
+
+    // bottom
+    alpha = (uint8_t)((sy - (int)sy) * 255.0);
+    SDL_SetRenderDrawColor(rend, r, g, b, alpha);
+    SDL_RenderDrawLine(rend, (int)sx - 1, (int)ey, (int)ex, (int)ey);
+
+    // left 
+    alpha = (uint8_t)((1.0 - (sx - (int)sx)) * 255.0);
+    SDL_SetRenderDrawColor(rend, r, g, b, alpha);
+    SDL_RenderDrawLine(rend, (int)sx - 1, (int)sy, (int)sx - 1, (int)ey);
+
+    // right
+    alpha = (uint8_t)((ex - (int)ex) * 255.0);
+    SDL_SetRenderDrawColor(rend, r, g, b, alpha);
+    SDL_RenderDrawLine(rend, (int)ex, (int)sy, (int)ex, (int)ey);
+
+
+    // center
+    SDL_Rect crect = {
+        .x = (int)sx,
+        .y = (int)sy,
+        .w = (int)ex - (int)sx,
+        .h = (int)ey - (int)sy
+    };
+    SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
+    SDL_RenderFillRect(rend, &crect);
+}
+
+
+void drawFRectBorder(SDL_Renderer* rend, SDL_FRect* frect, float thickness, BorderType border_type) {
+    const float off = thickness * (float)border_type / 2.0f; // offset relies on BorderType integer values 
+    const float off2 = off * 2.0f;
+
+    SDL_FRect line_frect = {
+        .x = frect->x - off,
+        .y = frect->y - off,
+        .w = frect->w + off2,
+        .h = thickness
+    };
+
+    // top
     SDL_RenderFillRectF(rend, &line_frect);
 
     // bottom
