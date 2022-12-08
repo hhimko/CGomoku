@@ -7,17 +7,17 @@
 #include "../app.h"
 
 
-inline void defaultSceneUpdateCallback(uint64_t dt) { 
+void defaultSceneUpdateCallback(uint64_t dt) { 
     (void) dt; 
     fprintf(stderr, "Default scene update callback implementation has not been overriden");
 }
 
-inline void defaultSceneRenderCallback(RenderContext* ctx) { 
+void defaultSceneRenderCallback(RenderContext* ctx) { 
     (void) ctx; 
     fprintf(stderr, "Default scene render callback implementation has not been overriden");
 }
 
-inline SDL_bool defaultSceneHandleInputCallback(SDL_Event* event, AppState* state) { 
+SDL_bool defaultSceneHandleInputCallback(SDL_Event* event, AppState* state) { 
     (void) event;
     (void) state; 
     fprintf(stderr, "Default scene handleInput callback implementation has not been overriden");
