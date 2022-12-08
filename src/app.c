@@ -50,15 +50,15 @@ void mainloop(AppState* state, SDL_Window* win) {
     const uint64_t ms_per_frame = (uint64_t)round(1000.0 / (double)state->fps_cap);
     char fpsbuffer[9];
 
-    uint64_t f_start = SDL_GetTicks64() - ms_per_frame;
+    uint64_t f_start = SDL_GetTicks() - ms_per_frame;
     while (running)
     {
-        uint64_t f_current = SDL_GetTicks64();
+        uint64_t f_current = SDL_GetTicks();
         uint64_t f_elapsed = f_current - f_start;
         f_start = f_current;
 
         const uint64_t fps = (uint64_t)round(1000.0 / (double)f_elapsed);
-        snprintf(fpsbuffer, 9, "fps: %lld\n", fps);
+        snprintf(fpsbuffer, 9, "fps: %lud\n", fps);
         SDL_SetWindowTitle(win, fpsbuffer);
         
         // handle user input
@@ -78,7 +78,7 @@ void mainloop(AppState* state, SDL_Window* win) {
         SDL_RenderPresent(renderer);
 
         // wait the remaining frame time to minimalize CPU load
-        uint64_t f_end = SDL_GetTicks64();
+        uint64_t f_end = SDL_GetTicks();
         if (f_start + ms_per_frame > f_end) {
             SDL_Delay((uint32_t)(f_start + ms_per_frame - f_end));
         }

@@ -73,9 +73,7 @@ void menuRender(RenderContext* ctx) {
 SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
-            int32_t mx = e->motion.x;
-            int32_t my = e->motion.y;
-            updateParallax(mx, my, state->context->win_w, state->context->win_h);
+            updateParallax(e->motion.x, e->motion.y, state->context->win_w, state->context->win_h);
             return SDL_TRUE;
     }
 

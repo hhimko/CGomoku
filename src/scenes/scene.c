@@ -18,7 +18,8 @@ inline void defaultSceneRenderCallback(RenderContext* ctx) {
 }
 
 inline SDL_bool defaultSceneHandleInputCallback(SDL_Event* event, AppState* state) { 
-    (void) event, state; 
+    (void) event;
+    (void) state; 
     fprintf(stderr, "Default scene handleInput callback implementation has not been overriden");
     return SDL_FALSE;
 }
