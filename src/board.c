@@ -38,7 +38,7 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
     // render vertical grid lines 
     float line_gap = size / ((float)board->cell_count + 2.0f);
 
-    SDL_FRect frect = {
+    FRect frect = {
         .x = line_gap - LINE_WIDTH_HALF + pos_x, 
         .y = line_gap - LINE_WIDTH_HALF + pos_y, 
         .w = LINE_WIDTH, 
@@ -48,7 +48,7 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
     SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     for (size_t vline = 0; vline < board->cell_count + 1; ++vline)
     {
-        SDL_RenderFillRectF(rend, &frect);
+        drawFilledFRect(rend, &frect);
         frect.x += line_gap;
     }
 
@@ -58,7 +58,7 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
     frect.h = LINE_WIDTH;
     for (size_t hline = 0; hline < board->cell_count + 1; ++hline)
     {
-        SDL_RenderFillRectF(rend, &frect);
+        drawFilledFRect(rend, &frect);
         frect.y += line_gap;
     }
 

@@ -52,7 +52,7 @@ void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
 
     SDL_SetRenderDrawColor(rend, 0xFF, 0x00, 0x00, SDL_ALPHA_OPAQUE);
 
-    SDL_FRect drawrect = {
+    FRect drawrect = {
         .x = rect->x - offset - thickness,
         .y = rect->y - offset - thickness,
         .w = thickness,

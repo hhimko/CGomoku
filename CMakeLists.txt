@@ -57,7 +57,7 @@ else() # Target system is not Windows
     find_package(SDL2 REQUIRED)
 endif()
 
-target_link_libraries(${BIN_NAME} ${SDL2_LIBRARIES})
+target_link_libraries(${BIN_NAME} ${SDL2_LIBRARIES} m)
 target_include_directories(${BIN_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
 
 # Copy asset directory to executable path
