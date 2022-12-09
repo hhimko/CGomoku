@@ -19,7 +19,10 @@ AppState* createAppState(RenderContext* ctx, uint16_t fps_cap) {
         state->context = ctx;
         state->fps_cap = fps_cap;
         state->scene.destroy = NULL; // scene destroy callback has to be null-initialized before setScene
-        setScene(state, SCENE_MENU); // initializes scene to main menu
+        if (setScene(state, SCENE_MENU) < 0) {  // initialize scene to main menu
+            destroyAppState(state);
+            return NULL;
+        }
     }
 
     return state;
@@ -88,6 +91,7 @@ void mainloop(AppState* state, SDL_Window* win) {
 int Gomoku_run(int argc, char* argv[]) {
     (void) argc; // |
     (void) argv; // | unused
+    uint16_t fps = DEFAULT_FPS;
 
     SDL_Window* window = NULL;
     RenderContext* context = createRenderContext(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
@@ -107,8 +111,15 @@ int Gomoku_run(int argc, char* argv[]) {
         return -1;
     }
 
-    uint16_t fps = DEFAULT_FPS;
     AppState* state = createAppState(context, fps);
+    if (state == NULL) {
+        fprintf(stderr, "Failed to create AppState.\n"); 
+        destroyUI();
+        quitSDL(context, window);
+        destroyRenderContext(context);
+        return -1;
+    }
+
     mainloop(state, window);
 
     // free up resources after the mainloop quits
@@ -116,6 +127,5 @@ int Gomoku_run(int argc, char* argv[]) {
     destroyUI();
     quitSDL(context, window);
     destroyRenderContext(context);
-
     return 0;
 }

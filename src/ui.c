@@ -42,9 +42,9 @@ int precomputeSmoothstep() {
 }
 
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
-    static const float thickness = 7.0f; 
+    static const float thickness = 10.0f; 
     static const float length = 30; 
-    float offset = 25.0f + CURSOR_ANIMATION_STRENGTH * (float)smoothstep_inout(s_cursor_animation_t); 
+    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)smoothstep_inout(s_cursor_animation_t); 
 
     uint8_t r,g,b,a;
     SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
@@ -87,6 +87,31 @@ void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
     drawrect.w = thickness;
     drawrect.h = -length;
     drawFilledFRect(rend, &drawrect);
+
+    SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
+}
+
+Button* createButton(SDL_Rect* rect, buttonCallback callback){
+    Button* btn = malloc(sizeof(Button));
+
+    if (btn != NULL) {
+        btn->rect = *rect;
+        btn->callback = callback;
+    }
+
+    return btn;
+}
+
+void destroyButton(Button* btn) {
+    free(btn);
+}
+
+void renderButton(SDL_Renderer* rend, Button* btn) {
+    uint8_t r,g,b,a;
+    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
+
+    SDL_SetRenderDrawColor(rend, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
+    SDL_RenderFillRect(rend, &btn->rect);
 
     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
 }

@@ -1,6 +1,7 @@
 #include "./menu.h"
 
 #include <assert.h>
+#include <stdio.h>
 #include <math.h>
 #include <SDL.h>
 
@@ -12,14 +13,19 @@
 #define SEIGAIHA_RADIUS 80
 #define BACKGROUND_ANIMATION_STEP 0.0003
 
+#define MENU_BUTTON_PLAY   0
+#define MENU_BUTTON_OPTS   1
+#define MENU_BUTTON_EXIT   2
+#define MENU_BUTTONS_COUNT 3
+
+static Button* s_buttons[MENU_BUTTONS_COUNT] = { NULL, NULL, NULL };
+static size_t s_selected_button = MENU_BUTTON_PLAY;
 
 static int s_parallax_x = 0;
 static int s_parallax_y = 0;
 
 static double s_background_offset = 0.0;
 static SDL_Texture* s_background_texture = NULL;
-
-// static Button s_button = {.rect = {.x = 100, .y = 100, .w = 200, .h = 50}};
 
 
 void updateParallax(int32_t mouse_x, int32_t mouse_y, int win_w, int win_h) {
@@ -43,19 +49,6 @@ void renderMenuBackground(RenderContext* ctx) {
     renderTextureRepeat(ctx->renderer, s_background_texture, &rect);
 }
 
-void menuPrepare(AppState* state) {
-    s_parallax_x = 0;
-    s_parallax_y = 0;
-
-    s_background_offset = 0.0;
-
-    SDL_Color bg = { .r=0x4B, .g=0x67, .b=0x9C };
-    SDL_Color fg = { .r=0x2A, .g=0x4B, .b=0x74 };
-    s_background_texture = generateSeigaihaTexture(state->context->renderer, SEIGAIHA_RADIUS, 3, 0.1, &bg, &fg);
-
-    assert(s_background_texture != NULL);
-}
-
 void menuUpdate(uint64_t dt) {
     s_background_offset = s_background_offset + BACKGROUND_ANIMATION_STEP*dt;
     if (s_background_offset >= 1.0) 
@@ -65,9 +58,11 @@ void menuUpdate(uint64_t dt) {
 void menuRender(RenderContext* ctx) {
     renderMenuBackground(ctx);
 
-    SDL_Rect rect = {.x = 100, .y = 100, .w = 200, .h = 50};
-
-    renderSelectionCursor(ctx->renderer, &rect);
+    for (size_t i = 0; i < MENU_BUTTONS_COUNT; ++i) {
+        renderButton(ctx->renderer, s_buttons[i]);
+        if (i == s_selected_button)
+            renderSelectionCursor(ctx->renderer, &s_buttons[i]->rect);
+    }
 }
 
 SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
@@ -80,8 +75,16 @@ SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
     return SDL_FALSE;
 }
 
-void menuDestroy() {
-    SDL_DestroyTexture(s_background_texture);
+void buttonPlayCallback() {
+    printf("btn play\n");
+}
+
+void buttonOptionsCallback() {
+    printf("btn options\n");
+}
+
+void buttonExitCallback() {
+    printf("btn exit\n");
 }
 
 void setMenuSceneCallbacks(AppState* state) {
@@ -89,4 +92,35 @@ void setMenuSceneCallbacks(AppState* state) {
     state->scene.render = menuRender;
     state->scene.handle_input = menuHandleInput;
     state->scene.destroy = menuDestroy;
+}
+
+int menuPrepare(AppState* state) {
+    s_background_offset = 0.0;
+    s_parallax_x = 0;
+    s_parallax_y = 0;
+
+    s_background_texture = generateSeigaihaTexture(
+        state->context->renderer, SEIGAIHA_RADIUS, 3, 0.1, 
+        &(SDL_Color){ .r=0x4B, .g=0x67, .b=0x9C }, 
+        &(SDL_Color){ .r=0x2A, .g=0x4B, .b=0x74 }
+    );
+
+    s_buttons[MENU_BUTTON_PLAY] = createButton(&(SDL_Rect){ .x=600, .y=300, .w=500, .h=100 }, buttonPlayCallback);
+    s_buttons[MENU_BUTTON_OPTS] = createButton(&(SDL_Rect){ .x=600, .y=500, .w=500, .h=100 }, buttonOptionsCallback);
+    s_buttons[MENU_BUTTON_EXIT] = createButton(&(SDL_Rect){ .x=600, .y=700, .w=500, .h=100 }, buttonExitCallback);
+    s_selected_button = MENU_BUTTON_PLAY;
+
+    if (!s_buttons[MENU_BUTTON_PLAY] || !s_buttons[MENU_BUTTON_OPTS] || !s_buttons[MENU_BUTTON_EXIT]) 
+        goto fail;
+
+    setMenuSceneCallbacks(state);
+    return 0;
+
+fail:
+    fprintf(stderr, "Failed to prepare main menu scene\n");
+    return -1;
+}
+
+void menuDestroy() {
+    SDL_DestroyTexture(s_background_texture);
 }

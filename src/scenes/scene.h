@@ -30,6 +30,6 @@ struct Scene {
     sceneDestroyCallback destroy;
 };
 
-void setScene(struct AppState* state, SceneState new_scene_state);
+int setScene(struct AppState* state, SceneState new_scene_state);
 
 #endif /* SCENE_H_ */

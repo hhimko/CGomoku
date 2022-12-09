@@ -4,10 +4,7 @@
 #include "../app.h"
 
 
-void menuPrepare(AppState* state);
-
-void setMenuSceneCallbacks(AppState* state);
-
+int menuPrepare(AppState* state);
 void menuDestroy();
 
 #endif /* MENU_H_ */

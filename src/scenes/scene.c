@@ -30,7 +30,7 @@ void setDefaultSceneCallbacks(AppState* state) {
     state->scene.handle_input = defaultSceneHandleInputCallback;
 }
 
-void setScene(AppState* state, SceneState new_scene_state) {
+int setScene(AppState* state, SceneState new_scene_state) {
     if (state->scene.destroy != NULL) // scene destroy callback has to be null-initialized before setScene
         state->scene.destroy(); 
     state->scene.state = new_scene_state;
@@ -38,11 +38,9 @@ void setScene(AppState* state, SceneState new_scene_state) {
 
     switch (new_scene_state) {
         case SCENE_MENU:
-            menuPrepare(state);
-            setMenuSceneCallbacks(state);
-            break;
-        default:
-            assert(!"This line should never be reached.");
-            break;
+            return menuPrepare(state);
     }
+
+    fprintf(stderr, "Failed to change scene. Unexpected SceneState - %d\n", (int)new_scene_state);
+    return -1;
 }

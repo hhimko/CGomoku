@@ -10,13 +10,15 @@ void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect);
 
 /* Structure containing all data necessary for rendering and handling a button widget. */
 typedef struct Button Button;
-typedef void(*buttonCallback)(void);
+typedef void(*buttonCallback)();
 
 struct Button {
     SDL_Rect rect;
     buttonCallback callback;
-    SDL_bool selected;
 };
+
+Button* createButton(SDL_Rect* rect, buttonCallback callback);
+void destroyButton(Button* btn);
 
 void renderButton(SDL_Renderer* rend, Button* btn);
 
