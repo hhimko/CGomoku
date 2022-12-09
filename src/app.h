@@ -21,5 +21,6 @@ void destroyAppState(AppState* state);
 
 /* Gomoku app entry point */
 int Gomoku_run(int argc, char* argv[]);
+void Gomoku_shutdown();
 
 #endif /* APP_H_ */

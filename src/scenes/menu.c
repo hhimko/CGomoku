@@ -28,7 +28,7 @@ static double s_background_offset = 0.0;
 static SDL_Texture* s_background_texture = NULL;
 
 
-void updateParallax(int32_t mouse_x, int32_t mouse_y, int win_w, int win_h) {
+void updateBackgroundParallax(int32_t mouse_x, int32_t mouse_y, int win_w, int win_h) {
     double xnorm = mouse_x / (double)win_w;
     double ynorm = mouse_y / (double)win_h;
 
@@ -68,23 +68,44 @@ void menuRender(RenderContext* ctx) {
 SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
-            updateParallax(e->motion.x, e->motion.y, state->context->win_w, state->context->win_h);
-            return SDL_TRUE;
+            updateBackgroundParallax(e->motion.x, e->motion.y, state->context->win_w, state->context->win_h);
+            break;
+
+        case SDL_KEYDOWN:
+            switch (e->key.keysym.sym) {
+                case SDLK_UP:
+                    // decrement selected button index on key up
+                    s_selected_button = (--s_selected_button > MENU_BUTTONS_COUNT) ? MENU_BUTTONS_COUNT - 1 : s_selected_button;
+                    return SDL_TRUE;
+
+                case SDLK_DOWN:
+                    // increment selected button index on key down
+                    s_selected_button = (++s_selected_button) % MENU_BUTTONS_COUNT;
+                    return SDL_TRUE;
+
+                case SDLK_RETURN:
+                    // fire selected button callback on key enter
+                    s_buttons[s_selected_button]->callback(state);
+                    return SDL_TRUE;
+            }
     }
 
     return SDL_FALSE;
 }
 
-void buttonPlayCallback() {
+void buttonPlayCallback(AppState* state) {
+    (void) state;
     printf("btn play\n");
 }
 
-void buttonOptionsCallback() {
+void buttonOptionsCallback(AppState* state) {
+    (void) state;
     printf("btn options\n");
 }
 
-void buttonExitCallback() {
-    printf("btn exit\n");
+void buttonExitCallback(AppState* state) {
+    (void) state;
+    Gomoku_shutdown();
 }
 
 void setMenuSceneCallbacks(AppState* state) {

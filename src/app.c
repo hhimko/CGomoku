@@ -11,6 +11,8 @@
 #define DEFAULT_SCREEN_WIDTH 1920
 #define DEFAULT_SCREEN_HEIGHT 1080
 
+static SDL_bool s_running = SDL_FALSE;
+
 
 AppState* createAppState(RenderContext* ctx, uint16_t fps_cap) {
     AppState* state = malloc(sizeof(AppState));
@@ -46,7 +48,7 @@ int handleEvents(AppState* state) {
 }
 
 void mainloop(AppState* state, SDL_Window* win) {
-    SDL_bool running = SDL_TRUE;
+    s_running = SDL_TRUE;
     RenderContext* context = state->context; 
     SDL_Renderer* renderer = context->renderer; 
 
@@ -54,7 +56,7 @@ void mainloop(AppState* state, SDL_Window* win) {
     char fpsbuffer[9];
 
     uint64_t f_start = SDL_GetTicks() - ms_per_frame;
-    while (running)
+    while (s_running)
     {
         uint64_t f_current = SDL_GetTicks();
         uint64_t f_elapsed = f_current - f_start;
@@ -65,9 +67,8 @@ void mainloop(AppState* state, SDL_Window* win) {
         SDL_SetWindowTitle(win, fpsbuffer);
         
         // handle user input
-        if (handleEvents(state) < 0) {
-            running = SDL_FALSE;
-        }
+        if (handleEvents(state) < 0)
+            Gomoku_shutdown();
 
         // update logic state
         updateUI(f_elapsed);
@@ -128,4 +129,8 @@ int Gomoku_run(int argc, char* argv[]) {
     quitSDL(context, window);
     destroyRenderContext(context);
     return 0;
+}
+
+void Gomoku_shutdown() {
+    s_running = SDL_FALSE;
 }

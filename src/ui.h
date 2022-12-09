@@ -4,13 +4,14 @@
 #include <SDL.h>
 
 #include "./sdl/render.h"
+#include "./app.h"
 
 
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect);
 
 /* Structure containing all data necessary for rendering and handling a button widget. */
 typedef struct Button Button;
-typedef void(*buttonCallback)();
+typedef void (*buttonCallback)(AppState* state);
 
 struct Button {
     SDL_Rect rect;
