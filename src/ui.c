@@ -41,7 +41,6 @@ int precomputeSmoothstep() {
     return 0;
 }
 
-
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
     static const float thickness = 7.0f; 
     static const float length = 30; 

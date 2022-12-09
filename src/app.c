@@ -58,7 +58,7 @@ void mainloop(AppState* state, SDL_Window* win) {
         f_start = f_current;
 
         const uint64_t fps = (uint64_t)round(1000.0 / (double)f_elapsed);
-        snprintf(fpsbuffer, 9, "fps: %lud\n", fps);
+        snprintf(fpsbuffer, 9, "fps: %llu\n", fps);
         SDL_SetWindowTitle(win, fpsbuffer);
         
         // handle user input
