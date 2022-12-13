@@ -18,6 +18,10 @@
 #define MENU_BUTTON_EXIT   2
 #define MENU_BUTTONS_COUNT 3
 
+#define BUTTON_WIDTH  700
+#define BUTTON_HEIGHT 120
+#define BUTTON_GAP    80
+
 static Button* s_buttons[MENU_BUTTONS_COUNT] = { NULL, NULL, NULL };
 static size_t s_selected_button = MENU_BUTTON_PLAY;
 
@@ -126,9 +130,26 @@ int menuPrepare(AppState* state) {
         &(SDL_Color){ .r=0x2A, .g=0x4B, .b=0x74 }
     );
 
-    s_buttons[MENU_BUTTON_PLAY] = createButton(&(SDL_Rect){ .x=600, .y=300, .w=500, .h=100 }, buttonPlayCallback);
-    s_buttons[MENU_BUTTON_OPTS] = createButton(&(SDL_Rect){ .x=600, .y=500, .w=500, .h=100 }, buttonOptionsCallback);
-    s_buttons[MENU_BUTTON_EXIT] = createButton(&(SDL_Rect){ .x=600, .y=700, .w=500, .h=100 }, buttonExitCallback);
+    int w = state->context->win_w;
+    int h = state->context->win_h;
+    SDL_Rect btn_rect = { 
+        .x = w/2 - BUTTON_WIDTH/2, 
+        .y = h/2 - BUTTON_HEIGHT/2 - BUTTON_HEIGHT - BUTTON_GAP, 
+        .w = BUTTON_WIDTH, 
+        .h = BUTTON_HEIGHT 
+    };
+
+    // button play
+    s_buttons[MENU_BUTTON_PLAY] = createButton(btn_rect, buttonPlayCallback);
+
+    // button options
+    btn_rect.y += BUTTON_HEIGHT + BUTTON_GAP;
+    s_buttons[MENU_BUTTON_OPTS] = createButton(btn_rect, buttonOptionsCallback);
+
+    // button exit
+    btn_rect.y += BUTTON_HEIGHT + BUTTON_GAP;
+    s_buttons[MENU_BUTTON_EXIT] = createButton(btn_rect, buttonExitCallback);
+
     s_selected_button = MENU_BUTTON_PLAY;
 
     if (!s_buttons[MENU_BUTTON_PLAY] || !s_buttons[MENU_BUTTON_OPTS] || !s_buttons[MENU_BUTTON_EXIT]) 
@@ -139,9 +160,13 @@ int menuPrepare(AppState* state) {
 
 fail:
     fprintf(stderr, "Failed to prepare main menu scene\n");
+    menuDestroy();
     return -1;
 }
 
 void menuDestroy() {
     SDL_DestroyTexture(s_background_texture);
+    destroyButton(s_buttons[MENU_BUTTON_PLAY]);
+    destroyButton(s_buttons[MENU_BUTTON_OPTS]);
+    destroyButton(s_buttons[MENU_BUTTON_EXIT]);
 }

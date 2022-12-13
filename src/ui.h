@@ -18,7 +18,7 @@ struct Button {
     buttonCallback callback;
 };
 
-Button* createButton(SDL_Rect* rect, buttonCallback callback);
+Button* createButton(SDL_Rect rect, buttonCallback callback);
 void destroyButton(Button* btn);
 
 void renderButton(SDL_Renderer* rend, Button* btn);

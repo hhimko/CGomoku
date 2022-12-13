@@ -91,11 +91,11 @@ void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
 }
 
-Button* createButton(SDL_Rect* rect, buttonCallback callback){
+Button* createButton(SDL_Rect rect, buttonCallback callback){
     Button* btn = malloc(sizeof(Button));
 
     if (btn != NULL) {
-        btn->rect = *rect;
+        btn->rect = rect;
         btn->callback = callback;
     }
 
