@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <math.h>
 #include <stdio.h>
-#include <assert.h>
+#include <stdlib.h>
 
 #include "./sdl/render.h"
 #include "./sdl/texture.h"
@@ -23,6 +23,8 @@ static double s_cursor_animation_t = 0.0;
 
 static int s_seigaiha_parallax_x = 0;
 static int s_seigaiha_parallax_y = 0;
+static int s_seigaiha_direction_x = 1;
+static int s_seigaiha_direction_y = 1;
 
 static double s_background_offset = 0.0;
 static SDL_Texture* s_background_texture = NULL;
@@ -62,7 +64,7 @@ int loadSeigaihaBackgroundTexture(RenderContext* ctx, SDL_Color* bg, SDL_Color* 
     return 0;    
 }
 
-void updateSeigaihaParallax(RenderContext* ctx, int32_t mouse_x, int32_t mouse_y) {
+void updateSeigaihaBackgroundParallax(RenderContext* ctx, int32_t mouse_x, int32_t mouse_y) {
     double xnorm = mouse_x / (double)ctx->win_w;
     double ynorm = mouse_y / (double)ctx->win_h;
 
@@ -70,14 +72,25 @@ void updateSeigaihaParallax(RenderContext* ctx, int32_t mouse_x, int32_t mouse_y
     s_seigaiha_parallax_y = (int)round(SEIGAIHA_RADIUS*ynorm);
 }
 
+void randomizeSeigaihaBackgroundDirection() {
+    // current method makes sure at least one axis gets flipped
+    if (rand() % 2) {
+        s_seigaiha_direction_x *= -1;
+        if (rand() % 2) s_seigaiha_direction_y *= -1;
+    } else {
+        s_seigaiha_direction_y *= -1;
+        if (rand() % 2) s_seigaiha_direction_x *= -1;
+    }
+}
+
 void renderSeigaihaBackground(RenderContext* ctx) {
     int animation_offset = 2*SEIGAIHA_RADIUS - (int)round(2*SEIGAIHA_RADIUS*s_background_offset);
 
     SDL_Rect rect = { 
-        .x = -animation_offset - s_seigaiha_parallax_x,
-        .y = -animation_offset - s_seigaiha_parallax_y, 
-        .w = ctx->win_w + animation_offset + s_seigaiha_parallax_x, 
-        .h = ctx->win_h + animation_offset + s_seigaiha_parallax_y
+        .x = -s_seigaiha_parallax_x - SEIGAIHA_RADIUS*2 - animation_offset*s_seigaiha_direction_x,
+        .y = -s_seigaiha_parallax_y - SEIGAIHA_RADIUS*2 - animation_offset*s_seigaiha_direction_y, 
+        .w = ctx->win_w + animation_offset + s_seigaiha_parallax_x + SEIGAIHA_RADIUS*2, 
+        .h = ctx->win_h + animation_offset + s_seigaiha_parallax_y + SEIGAIHA_RADIUS*2
     };
 
     renderTextureRepeat(ctx->renderer, s_background_texture, &rect);

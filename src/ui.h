@@ -7,7 +7,8 @@
 #include "./app.h"
 
 int loadSeigaihaBackgroundTexture(RenderContext* ctx, SDL_Color* bg, SDL_Color* fg);
-void updateSeigaihaParallax(RenderContext* ctx, int32_t mouse_x, int32_t mouse_y);
+void randomizeSeigaihaBackgroundDirection();
+void updateSeigaihaBackgroundParallax(RenderContext* ctx, int32_t mouse_x, int32_t mouse_y);
 void renderSeigaihaBackground(RenderContext* ctx);
 
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect);

@@ -4,8 +4,6 @@
 #include <math.h>
 #include <SDL.h>
 
-#include "../sdl/texture.h"
-#include "../board.h"
 #include "../app.h"
 #include "../ui.h"
 
@@ -22,12 +20,19 @@
 static Button* s_buttons[MENU_BUTTONS_COUNT] = { NULL, NULL, NULL };
 static size_t s_selected_button = MENU_BUTTON_PLAY;
 
-static int s_parallax_x = 0;
-static int s_parallax_y = 0;
 
-static double s_background_offset = 0.0;
-static SDL_Texture* s_background_texture = NULL;
+void buttonPlayCallback(AppState* state) {
+    setScene(state, SCENE_GAME);
+}
 
+void buttonOptionsCallback(AppState* state) {
+    setScene(state, SCENE_OPTIONS);
+}
+
+void buttonExitCallback(AppState* state) {
+    (void) state;
+    Gomoku_shutdown();
+}
 
 void menuUpdate(uint64_t dt) {
     (void) dt;
@@ -46,7 +51,7 @@ void menuRender(RenderContext* ctx) {
 SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
-            updateSeigaihaParallax(state->context, e->motion.x, e->motion.y);
+            updateSeigaihaBackgroundParallax(state->context, e->motion.x, e->motion.y);
             break;
 
         case SDL_KEYDOWN:
@@ -71,21 +76,6 @@ SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
     return SDL_FALSE;
 }
 
-void buttonPlayCallback(AppState* state) {
-    (void) state;
-    printf("btn play\n");
-}
-
-void buttonOptionsCallback(AppState* state) {
-    (void) state;
-    printf("btn options\n");
-}
-
-void buttonExitCallback(AppState* state) {
-    (void) state;
-    Gomoku_shutdown();
-}
-
 void setMenuSceneCallbacks(AppState* state) {
     state->scene.update = menuUpdate;
     state->scene.render = menuRender;
@@ -97,6 +87,7 @@ int menuPrepare(AppState* state) {
     SDL_Color bg = { .r=0x4B, .g=0x67, .b=0x9C };
     SDL_Color fg = { .r=0x2A, .g=0x4B, .b=0x74 };
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
+    randomizeSeigaihaBackgroundDirection();
 
     int w = state->context->win_w;
     int h = state->context->win_h;

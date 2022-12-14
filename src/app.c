@@ -1,7 +1,9 @@
 #include "./app.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include <SDL.h>
 
 #include "./scenes/scene.h"
@@ -92,6 +94,7 @@ void mainloop(AppState* state, SDL_Window* win) {
 int Gomoku_run(int argc, char* argv[]) {
     (void) argc; // |
     (void) argv; // | unused
+    srand((unsigned)time(NULL));
     uint16_t fps = DEFAULT_FPS;
 
     SDL_Window* window = NULL;

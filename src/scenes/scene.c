@@ -5,6 +5,7 @@
 
 #include "../app.h"
 #include "./menu.h"
+#include "./game.h"
 #include "./options.h"
 
 
@@ -42,6 +43,8 @@ int setScene(AppState* state, SceneState new_scene_state) {
             return menuPrepare(state);
         case SCENE_OPTIONS:
             return optionsPrepare(state);
+        case SCENE_GAME:
+            return gamePrepare(state);
     }
 
     fprintf(stderr, "Failed to change scene. Unexpected SceneState - %d\n", (int)new_scene_state);

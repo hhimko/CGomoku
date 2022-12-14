@@ -4,11 +4,18 @@
 #include <math.h>
 #include <SDL.h>
 
-#include "../sdl/texture.h"
-#include "../board.h"
 #include "../app.h"
 #include "../ui.h"
 
+#define BUTTON_WIDTH  700
+#define BUTTON_HEIGHT 120
+
+static Button* s_return_button = NULL;
+
+
+void buttonReturnCallback(AppState* state) {
+    setScene(state, SCENE_MENU);
+}
 
 void optionsUpdate(uint64_t dt) {
     (void) dt;
@@ -16,13 +23,25 @@ void optionsUpdate(uint64_t dt) {
 
 void optionsRender(RenderContext* ctx) {
     renderSeigaihaBackground(ctx);
+
+    renderButton(ctx->renderer, s_return_button);
+    renderSelectionCursor(ctx->renderer, &s_return_button->rect);
 }
 
 SDL_bool optionsHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
-            updateSeigaihaParallax(state->context, e->motion.x, e->motion.y);
+            updateSeigaihaBackgroundParallax(state->context, e->motion.x, e->motion.y);
             break;
+
+        case SDL_KEYDOWN:
+            switch (e->key.keysym.sym) {
+                case SDLK_ESCAPE:
+                case SDLK_RETURN:
+                    // fire selected button callback on key enter | escape
+                    s_return_button->callback(state);
+                    return SDL_TRUE;
+            }
     }
 
     return SDL_FALSE;
@@ -36,9 +55,22 @@ void setOptionsSceneCallbacks(AppState* state) {
 }
 
 int optionsPrepare(AppState* state) {
-    SDL_Color bg = { .r=0x4B, .g=0x67, .b=0x9C };
-    SDL_Color fg = { .r=0x2A, .g=0x4B, .b=0x74 };
+    SDL_Color bg = { .r=0x2C, .g=0xAD, .b=0x87 };
+    SDL_Color fg = { .r=0x31, .g=0x9E, .b=0x76 };
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
+    randomizeSeigaihaBackgroundDirection();
+
+    int w = state->context->win_w;
+    int h = state->context->win_h;
+    SDL_Rect btn_rect = { 
+        .x = w/2 - BUTTON_WIDTH/2, 
+        .y = h - BUTTON_HEIGHT - 100,
+        .w = BUTTON_WIDTH, 
+        .h = BUTTON_HEIGHT 
+    };
+
+    s_return_button = createButton(btn_rect, buttonReturnCallback);
+    if (s_return_button == NULL) goto fail;
 
     setOptionsSceneCallbacks(state);
     return 0;
@@ -50,5 +82,5 @@ fail:
 }
 
 void optionsDestroy() {
-
+    destroyButton(s_return_button);
 }
