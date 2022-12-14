@@ -3,8 +3,9 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "./menu.h"
 #include "../app.h"
+#include "./menu.h"
+#include "./options.h"
 
 
 void defaultSceneUpdateCallback(uint64_t dt) { 
@@ -39,6 +40,8 @@ int setScene(AppState* state, SceneState new_scene_state) {
     switch (new_scene_state) {
         case SCENE_MENU:
             return menuPrepare(state);
+        case SCENE_OPTIONS:
+            return optionsPrepare(state);
     }
 
     fprintf(stderr, "Failed to change scene. Unexpected SceneState - %d\n", (int)new_scene_state);

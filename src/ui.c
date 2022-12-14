@@ -6,16 +6,28 @@
 #include <assert.h>
 
 #include "./sdl/render.h"
+#include "./sdl/texture.h"
 
-#define CLAMP(a, b, x) (((x) < (a)) ? (a) : (((x) > (b)) ? (b) : (x)))
 
+/* SMOOTHSTEP FUNCTION  */
 #define SMOOTHSTEP_RESOLUTION 100
 #define CURSOR_ANIMATION_STEP 0.0005
 #define CURSOR_ANIMATION_STRENGTH 15.0f
 
-
 static double* __s_smoothstep_arr = NULL; 
 static double s_cursor_animation_t = 0.0;
+
+/* SIGAIHA BACKGROUND */
+#define SEIGAIHA_RADIUS 80
+#define SEIGAIHA_ANIMATION_STEP 0.0003
+
+static int s_seigaiha_parallax_x = 0;
+static int s_seigaiha_parallax_y = 0;
+
+static double s_background_offset = 0.0;
+static SDL_Texture* s_background_texture = NULL;
+
+#define CLAMP(a, b, x) (((x) < (a)) ? (a) : (((x) > (b)) ? (b) : (x)))
 
 
 double smoothstep(double x) {
@@ -39,6 +51,36 @@ int precomputeSmoothstep() {
     }
 
     return 0;
+}
+
+int loadSeigaihaBackgroundTexture(RenderContext* ctx, SDL_Color* bg, SDL_Color* fg) {
+    SDL_DestroyTexture(s_background_texture);
+    s_background_texture = generateSeigaihaTexture(ctx->renderer, SEIGAIHA_RADIUS, 3, 0.1, bg, fg);
+    if (s_background_texture == NULL)
+        return -1;
+
+    return 0;    
+}
+
+void updateSeigaihaParallax(RenderContext* ctx, int32_t mouse_x, int32_t mouse_y) {
+    double xnorm = mouse_x / (double)ctx->win_w;
+    double ynorm = mouse_y / (double)ctx->win_h;
+
+    s_seigaiha_parallax_x = (int)round(2*SEIGAIHA_RADIUS*xnorm);
+    s_seigaiha_parallax_y = (int)round(SEIGAIHA_RADIUS*ynorm);
+}
+
+void renderSeigaihaBackground(RenderContext* ctx) {
+    int animation_offset = 2*SEIGAIHA_RADIUS - (int)round(2*SEIGAIHA_RADIUS*s_background_offset);
+
+    SDL_Rect rect = { 
+        .x = -animation_offset - s_seigaiha_parallax_x,
+        .y = -animation_offset - s_seigaiha_parallax_y, 
+        .w = ctx->win_w + animation_offset + s_seigaiha_parallax_x, 
+        .h = ctx->win_h + animation_offset + s_seigaiha_parallax_y
+    };
+
+    renderTextureRepeat(ctx->renderer, s_background_texture, &rect);
 }
 
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
@@ -128,11 +170,16 @@ int initializeUI() {
 }
 
 void updateUI(uint64_t dt) {
-   s_cursor_animation_t = s_cursor_animation_t + CURSOR_ANIMATION_STEP*dt;
+    s_cursor_animation_t = s_cursor_animation_t + CURSOR_ANIMATION_STEP*dt;
     if (s_cursor_animation_t >= 1.0) 
         s_cursor_animation_t -= (int)s_cursor_animation_t;
+
+    s_background_offset = s_background_offset + SEIGAIHA_ANIMATION_STEP*dt;
+    if (s_background_offset >= 1.0) 
+        s_background_offset -= (int)s_background_offset;
 }
 
 void destroyUI() {
     free(__s_smoothstep_arr);
+    SDL_DestroyTexture(s_background_texture);
 }
