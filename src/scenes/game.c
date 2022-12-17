@@ -9,6 +9,10 @@
 #include "../app.h"
 #include "../ui.h"
 
+static Board* s_board = NULL;
+
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+
 
 void gameUpdate(uint64_t dt) {
     (void) dt;
@@ -16,15 +20,20 @@ void gameUpdate(uint64_t dt) {
 
 void gameRender(RenderContext* ctx) {
     renderSeigaihaBackground(ctx);
+
+    uint32_t size = MIN(ctx->win_w, ctx->win_h) - 250;
+    renderBoard(ctx, s_board, ctx->win_w/2 - size/2, ctx->win_h/2 - size/2, size);
 }
 
 SDL_bool gameHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
             updateSeigaihaBackgroundParallax(state->context, e->motion.x, e->motion.y);
+            if (boardHandleMouseMotion(s_board, e->motion.x, e->motion.y)) return SDL_TRUE;
             break;
 
         case SDL_KEYDOWN:
+            if (boardHandleKeyDown(s_board, e->key.keysym.sym)) return SDL_TRUE;
             switch (e->key.keysym.sym) {
                 default:
                     break;
@@ -47,6 +56,9 @@ int gamePrepare(AppState* state) {
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
     randomizeSeigaihaBackgroundDirection();
 
+    s_board = createBoard();
+    if (s_board == NULL) goto fail;
+
     setGameSceneCallbacks(state);
     return 0;
 
@@ -57,5 +69,5 @@ fail:
 }
 
 void gameDestroy() {
-
+    destroyBoard(s_board);
 }

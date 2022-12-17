@@ -20,22 +20,22 @@ void drawFilledFRect(SDL_Renderer* rend, FRect* frect) {
     // top
     alpha = (uint8_t)((1.0 - (sy - (int)sy)) * 255.0);
     SDL_SetRenderDrawColor(rend, r, g, b, alpha);
-    SDL_RenderDrawLine(rend, (int)sx - 1, (int)sy - 1, (int)ex, (int)sy - 1);
+    SDL_RenderDrawLine(rend, (int)sx, (int)sy - 1, (int)ex - 1, (int)sy - 1);
 
     // bottom
-    alpha = (uint8_t)((sy - (int)sy) * 255.0);
+    alpha = (uint8_t)((ey - (int)ey) * 255.0);
     SDL_SetRenderDrawColor(rend, r, g, b, alpha);
-    SDL_RenderDrawLine(rend, (int)sx - 1, (int)ey, (int)ex, (int)ey);
+    SDL_RenderDrawLine(rend, (int)sx, (int)ey, (int)ex - 1, (int)ey);
 
     // left 
     alpha = (uint8_t)((1.0 - (sx - (int)sx)) * 255.0);
     SDL_SetRenderDrawColor(rend, r, g, b, alpha);
-    SDL_RenderDrawLine(rend, (int)sx - 1, (int)sy, (int)sx - 1, (int)ey);
+    SDL_RenderDrawLine(rend, (int)sx - 1, (int)sy, (int)sx - 1, (int)ey - 1);
 
     // right
     alpha = (uint8_t)((ex - (int)ex) * 255.0);
     SDL_SetRenderDrawColor(rend, r, g, b, alpha);
-    SDL_RenderDrawLine(rend, (int)ex, (int)sy, (int)ex, (int)ey);
+    SDL_RenderDrawLine(rend, (int)ex, (int)sy, (int)ex, (int)ey - 1);
 
 
     // center

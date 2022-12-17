@@ -18,20 +18,18 @@ typedef enum BoardCell {
 } BoardCell;
 
 struct Board {
-    size_t cell_count; // number of cells in one row/column
+    size_t cell_count; // number of grid cells in one row/column
+    size_t selected_row, selected_col;
     BoardCell cells[BOARD_CELL_COUNT + 1][BOARD_CELL_COUNT + 1];
 };
 
 Board* createBoard();
 
-void destroyBoard(Board* board);
+SDL_bool boardHandleMouseMotion(Board* board, int32_t mx, int32_t my);
+SDL_bool boardHandleKeyDown(Board* board, SDL_Keycode key);
 
 void renderBoard(RenderContext* ctx, Board* board, int x, int y, unsigned int size);
 
-/* 
- * Render a tatami mat background on screen with given zoom level and offset values from the center. 
- * Zoom should be a float value bigger than 1. Smaller values are automatically mapped to 1. 
- */
-void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, double offset_y);
+void destroyBoard(Board* board);
 
 #endif /* BOARD_H_ */

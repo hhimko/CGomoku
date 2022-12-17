@@ -4,14 +4,12 @@
 
 #include "./sdl/texture.h"
 #include "./sdl/render.h"
+#include "./ui.h"
 
 #define LINE_WIDTH 2.0f
 #define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
 #define DOT_RADIUS 4.0f
 #define BORDER_WIDTH 6.0f
-
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 
 Board* createBoard() {
@@ -19,9 +17,42 @@ Board* createBoard() {
 
     if (board != NULL) {
         board->cell_count = BOARD_CELL_COUNT;
+        board->selected_row = 0;
+        board->selected_col = 0;
     }
 
     return board;
+}
+
+SDL_bool boardHandleMouseMotion(Board* board, int32_t mx, int32_t my) {
+    (void) board;
+    (void) mx;
+    (void) my;
+    return SDL_FALSE;
+}
+
+SDL_bool boardHandleKeyDown(Board* board, SDL_Keycode key) {
+    if (key == SDLK_LEFT) {
+        board->selected_col = board->selected_col == 0 ? BOARD_CELL_COUNT : board->selected_col - 1;
+        return SDL_TRUE;
+    } 
+    if (key == SDLK_RIGHT)
+    {
+        board->selected_col = board->selected_col == BOARD_CELL_COUNT ? 0 : board->selected_col + 1;
+        return SDL_TRUE;
+    }
+    if (key == SDLK_UP)
+    {
+        board->selected_row = board->selected_row == 0 ? BOARD_CELL_COUNT : board->selected_row - 1;
+        return SDL_TRUE;
+    }
+    if (key == SDLK_DOWN)
+    {
+        board->selected_row = board->selected_row == BOARD_CELL_COUNT ? 0 : board->selected_row + 1;
+        return SDL_TRUE;
+    }
+
+    return SDL_FALSE;
 }
 
 void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigned int size) {
@@ -79,97 +110,16 @@ void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigne
     drawFilledCircleAA(rend, cx - dot_offset, cy + dot_offset, 4);
     drawFilledCircleAA(rend, cx - dot_offset, cy - dot_offset, 4);
     drawFilledCircleAA(rend, cx + dot_offset, cy - dot_offset, 4);
+
+    // render selection cursor
+    frect.x = pos_x + (board->selected_col + 0.5f) * line_gap;
+    frect.y = pos_y + (board->selected_row + 0.5f) * line_gap;
+    frect.w = line_gap;
+    frect.h = line_gap;
+    
+    renderSelectionCursorF(rend, &frect);
 }
 
 void destroyBoard(Board* board){
     free(board);
-}
-
-void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, double offset_y) {
-    zoom = MAX(zoom, 1); // zoom value must be greater than 1
-    offset_x = MAX(MIN(offset_x, 1), -1); // |
-    offset_y = MAX(MIN(offset_y, 1), -1); // | offset values must be normalized to [-1, 1] range
-
-    SDL_Renderer* rend = ctx->renderer;
-    int win_w = ctx->win_w; 
-    int win_h = ctx->win_h;
-
-    SDL_Texture* tatami = loadTextureBMP(rend, "../assets/tatami.bmp");
-    SDL_Texture* tatami_half = loadTextureBMP(rend, "../assets/tatami_half.bmp");
-
-    int tex_w, tex_h;
-    // logic assumes both tatami textures are the same size 
-    if (getTextureSize(tatami, &tex_w, &tex_h) < 0) {
-        tex_w = 800; // |
-        tex_h = 800; // | quietly set an arbitrarily size manually
-    }
-
-    // bg is scaled in order to fill the entire screen
-    double scale_ratio = MAX(win_w * zoom / tex_w, win_h * zoom / tex_h);  
-    int bg_size_w = (int)(tex_w * scale_ratio);
-    int bg_size_h = (int)(tex_h * scale_ratio);
-    tex_w = (int)(bg_size_w / 3.);
-    tex_h = (int)(bg_size_h / 3.);
-
-    // calculate the final offsets with centering
-    int ox = (win_w - bg_size_w) / 2;
-    int oy = (win_h - bg_size_h) / 2;
-    ox += (int)(ox * offset_x);
-    oy += (int)(oy * offset_y);
-
-    SDL_Rect dstrect = { .w = tex_w, .h = tex_h };
-    /*  drawn pattern reference:
-     *      +------+------+------+
-     *      | half   half | half |
-     *      |  TL     TC  |  TR  |
-     *      +------+------+      +
-     *      | half | full | half |
-     *      |  CL  |  CC  |  CR  |
-     *      +      +------+------+
-     *      | half | half   half |
-     *      |  BL  |  BC     BR  |
-     *      +------+------+------+
-     */  
-
-    // top-left
-    dstrect.x = ox;
-    dstrect.y = oy; 
-    SDL_RenderCopy(rend, tatami_half, NULL, &dstrect);
-
-    // top-center
-    dstrect.x += tex_w;
-    SDL_RenderCopyEx(rend, tatami_half, NULL, &dstrect, 0., NULL, SDL_FLIP_HORIZONTAL);
-
-    // top-right
-    dstrect.x += tex_w;
-    SDL_RenderCopyEx(rend, tatami_half, NULL, &dstrect, 90., NULL, SDL_FLIP_NONE);
-
-    // center-left
-    dstrect.y += tex_h;
-    dstrect.x = ox;
-    SDL_RenderCopyEx(rend, tatami_half, NULL, &dstrect, 90., NULL, SDL_FLIP_NONE);
-
-    // center-center
-    dstrect.x += tex_w;
-    SDL_RenderCopy(rend, tatami, NULL, &dstrect);
-
-    // center-right
-    dstrect.x += tex_w;
-    SDL_RenderCopyEx(rend, tatami_half, NULL, &dstrect, -90., NULL, SDL_FLIP_NONE);
-
-    // bottom-left
-    dstrect.y += tex_h;
-    dstrect.x = ox;
-    SDL_RenderCopyEx(rend, tatami_half, NULL, &dstrect, -90., NULL, SDL_FLIP_NONE);
-
-    // bottom-center
-    dstrect.x += tex_w;
-    SDL_RenderCopy(rend, tatami_half, NULL, &dstrect); 
-
-    // bottom-right
-    dstrect.x += tex_w;
-    SDL_RenderCopyEx(rend, tatami_half, NULL, &dstrect, 0., NULL, SDL_FLIP_HORIZONTAL);
-
-    SDL_DestroyTexture(tatami);
-    SDL_DestroyTexture(tatami_half);
 }
