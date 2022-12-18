@@ -20,9 +20,7 @@ void gameUpdate(uint64_t dt) {
 
 void gameRender(RenderContext* ctx) {
     renderSeigaihaBackground(ctx);
-
-    uint32_t size = MIN(ctx->win_w, ctx->win_h) - 250;
-    renderBoard(ctx, s_board, ctx->win_w/2 - size/2, ctx->win_h/2 - size/2, size);
+    renderBoard(ctx, s_board);
 }
 
 SDL_bool gameHandleInput(SDL_Event* e, AppState* state) {
@@ -56,7 +54,8 @@ int gamePrepare(AppState* state) {
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
     randomizeSeigaihaBackgroundDirection();
 
-    s_board = createBoard();
+    uint32_t size = MIN(state->context->win_w, state->context->win_h) - 300;
+    s_board = createBoard(state->context->win_w/2 - size/2, state->context->win_h/2 - size/2, size);
     if (s_board == NULL) goto fail;
 
     setGameSceneCallbacks(state);

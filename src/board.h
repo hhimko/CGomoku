@@ -21,6 +21,8 @@ struct Board {
     size_t cell_count; // number of grid cells in one row/column
     size_t selected_row, selected_col;
     BoardCell cells[BOARD_CELL_COUNT + 1][BOARD_CELL_COUNT + 1];
+    int pos_x, pos_y;
+    uint32_t size;
 };
 
 Board* createBoard();
@@ -28,7 +30,7 @@ Board* createBoard();
 SDL_bool boardHandleMouseMotion(Board* board, int32_t mx, int32_t my);
 SDL_bool boardHandleKeyDown(Board* board, SDL_Keycode key);
 
-void renderBoard(RenderContext* ctx, Board* board, int x, int y, unsigned int size);
+void renderBoard(RenderContext* ctx, Board* board);
 
 void destroyBoard(Board* board);
 

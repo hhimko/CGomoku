@@ -1,6 +1,7 @@
 #include "./board.h"
 
 #include <math.h>
+#include <stdio.h>
 
 #include "./sdl/texture.h"
 #include "./sdl/render.h"
@@ -12,22 +13,31 @@
 #define BORDER_WIDTH 6.0f
 
 
-Board* createBoard() {
+Board* createBoard(int x, int y, uint32_t size) {
     Board* board = malloc(sizeof(Board));
 
     if (board != NULL) {
         board->cell_count = BOARD_CELL_COUNT;
         board->selected_row = 0;
         board->selected_col = 0;
+        board->pos_x = x;
+        board->pos_y = y;
+        board->size = size;
     }
 
     return board;
 }
 
 SDL_bool boardHandleMouseMotion(Board* board, int32_t mx, int32_t my) {
-    (void) board;
-    (void) mx;
-    (void) my;
+    float line_gap = board->size / ((float)board->cell_count + 2.0f);
+    int x = (mx - board->pos_x - (int)line_gap/2) / (int)line_gap;
+    if (0 <= x && x <= BOARD_CELL_COUNT) {
+        int y = (my - board->pos_y - (int)line_gap/2) / (int)line_gap;
+        if (0 <= y && y <= BOARD_CELL_COUNT) {
+            board->selected_col = x;
+            board->selected_row = y;
+        }
+    }
     return SDL_FALSE;
 }
 
@@ -55,8 +65,11 @@ SDL_bool boardHandleKeyDown(Board* board, SDL_Keycode key) {
     return SDL_FALSE;
 }
 
-void renderBoard(RenderContext* ctx, Board* board, int pos_x, int pos_y, unsigned int size) {
+void renderBoard(RenderContext* ctx, Board* board) {
     SDL_Renderer* rend = ctx->renderer;
+    int pos_x = board->pos_x;
+    int pos_y = board->pos_y;
+    uint32_t size = board->size;
 
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
