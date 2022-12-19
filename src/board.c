@@ -24,7 +24,7 @@ void initializeBoardCellArray(Board* board) {
     }
 }
 
-Board* createBoard(int x, int y, uint32_t size) {
+Board* createBoard(int x, int y, uint32_t size, SDL_Texture* black_piece_tex, SDL_Texture* white_piece_tex) {
     Board* board = (Board*)malloc(sizeof(Board));
 
     if (board != NULL) {
@@ -34,6 +34,8 @@ Board* createBoard(int x, int y, uint32_t size) {
         board->pos_x = x;
         board->pos_y = y;
         board->size = size;
+        board->black_piece_tex = black_piece_tex;
+        board->white_piece_tex = white_piece_tex;
         initializeBoardCellArray(board);
     }
 
@@ -159,6 +161,27 @@ void renderBoard(RenderContext* ctx, Board* board) {
     drawFilledCircleAA(rend, cx - dot_offset, cy - dot_offset, 4);
     drawFilledCircleAA(rend, cx + dot_offset, cy - dot_offset, 4);
 
+    // render board pieces
+    SDL_Rect piece_rect = { .w = (int)line_gap, .h = (int)line_gap };
+
+    for (size_t y = 0; y <= board->cell_count; ++y) {
+        for (size_t x = 0; x <= board->cell_count; ++x) {
+            BoardCell c = board->cells[y][x];
+            if (c == CELL_BLACK_PIECE) 
+            {
+                piece_rect.x = pos_x + (int)(line_gap*(x + 0.5f));
+                piece_rect.y = pos_y + (int)(line_gap*(y + 0.5f));
+                SDL_RenderCopy(rend, board->black_piece_tex, NULL, &piece_rect);
+            } 
+            else if (c == CELL_WHITE_PIECE) 
+            {
+                piece_rect.x = pos_x + (int)(line_gap*(x + 0.5f));
+                piece_rect.y = pos_y + (int)(line_gap*(y + 0.5f));
+                SDL_RenderCopy(rend, board->white_piece_tex, NULL, &piece_rect);
+            }
+        }
+    }
+
     // render selection cursor
     frect.x = pos_x + (board->selected_col + 0.5f) * line_gap;
     frect.y = pos_y + (board->selected_row + 0.5f) * line_gap;
@@ -169,5 +192,7 @@ void renderBoard(RenderContext* ctx, Board* board) {
 }
 
 void destroyBoard(Board* board){
+    SDL_DestroyTexture(board->black_piece_tex);
+    SDL_DestroyTexture(board->white_piece_tex);
     free(board);
 }

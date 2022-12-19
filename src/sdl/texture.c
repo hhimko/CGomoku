@@ -63,6 +63,24 @@ SDL_Texture* generateSolidTexture(SDL_Renderer* rend, uint8_t r, uint8_t g, uint
     return NULL;
 }
 
+SDL_Texture* generateSolidCircleTexture(SDL_Renderer* rend, int size, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    SDL_Texture* tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, size, size);
+    
+    if (tex != NULL && SDL_SetRenderTarget(rend, tex) >= 0) {
+        SDL_SetRenderDrawColor(rend, r, g, b, a);
+        drawFilledCircleAA(rend, size/2, size/2, size/2 - 1);
+
+        // detach texture from renderer 
+        if (SDL_SetRenderTarget(rend, NULL) >= 0) {
+            return tex;
+        }
+    }
+
+    fprintf(stderr, "Failed to generate solid circle texture. \nSDL_Error: %s\n", SDL_GetError());
+    SDL_DestroyTexture(tex);
+    return NULL;
+}
+
 void __drawSeigaihaSegemntRings(SDL_Renderer* rend, int x, int y, double rad, uint8_t ring_count, double ring_thickness) {
     double radoff = rad / ring_count; 
 

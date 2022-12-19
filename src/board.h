@@ -23,9 +23,11 @@ struct Board {
     BoardCell cells[BOARD_CELL_COUNT + 1][BOARD_CELL_COUNT + 1];
     int pos_x, pos_y;
     uint32_t size;
+    SDL_Texture* black_piece_tex;
+    SDL_Texture* white_piece_tex;
 };
 
-Board* createBoard();
+Board* createBoard(int x, int y, uint32_t size, SDL_Texture* black_piece_tex, SDL_Texture* white_piece_tex);
 
 int boardSetCell(Board* board, size_t x, size_t y, BoardCell cell);
 int boardCheckWin(Board* board, BoardCell piece, size_t x, size_t y);
