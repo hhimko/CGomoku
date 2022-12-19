@@ -5,11 +5,12 @@
 #include <SDL.h>
 
 #include "../sdl/texture.h"
+#include "../gomoku.h"
 #include "../board.h"
 #include "../app.h"
 #include "../ui.h"
 
-static Board* s_board = NULL;
+static GomokuGame* s_game = NULL;
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
@@ -20,24 +21,23 @@ void gameUpdate(uint64_t dt) {
 
 void gameRender(RenderContext* ctx) {
     renderSeigaihaBackground(ctx);
-    renderBoard(ctx, s_board);
+    renderBoard(ctx, s_game->board);
 }
 
 SDL_bool gameHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
             updateSeigaihaBackgroundParallax(state->context, e->motion.x, e->motion.y);
-            if (boardHandleMouseMotion(s_board, e->motion.x, e->motion.y)) return SDL_TRUE;
-            break;
 
         case SDL_KEYDOWN:
-            if (boardHandleKeyDown(s_board, e->key.keysym.sym)) return SDL_TRUE;
             switch (e->key.keysym.sym) {
-                default:
-                    break;
+                case SDLK_ESCAPE:
+                    setScene(state, SCENE_MENU);
+                    return SDL_TRUE;
             }
     }
 
+    if (s_game->handleInput(s_game, e)) return SDL_TRUE;
     return SDL_FALSE;
 }
 
@@ -55,8 +55,11 @@ int gamePrepare(AppState* state) {
     randomizeSeigaihaBackgroundDirection();
 
     uint32_t size = MIN(state->context->win_w, state->context->win_h) - 300;
-    s_board = createBoard(state->context->win_w/2 - size/2, state->context->win_h/2 - size/2, size);
-    if (s_board == NULL) goto fail;
+    Board* board = createBoard(state->context->win_w/2 - size/2, state->context->win_h/2 - size/2, size);
+    if (board == NULL) goto fail; // board gets freed in destroyGomokuGame() 
+
+    s_game = createGomokuGame(board);
+    if (s_game == NULL) goto fail;
 
     setGameSceneCallbacks(state);
     return 0;
@@ -68,5 +71,5 @@ fail:
 }
 
 void gameDestroy() {
-    destroyBoard(s_board);
+    destroyGomokuGame(s_game);
 }

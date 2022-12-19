@@ -1,7 +1,8 @@
 #include "./board.h"
 
-#include <math.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "./sdl/texture.h"
 #include "./sdl/render.h"
@@ -10,11 +11,21 @@
 #define LINE_WIDTH 2.0f
 #define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
 #define DOT_RADIUS 4.0f
-#define BORDER_WIDTH 6.0f
+#define BORDER_WIDTH 4.0f
 
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+
+
+void initializeBoardCellArray(Board* board) {
+    for (size_t y = 0; y <= board->cell_count; ++y) {
+        for (size_t x = 0; x <= board->cell_count; ++x) {
+            board->cells[y][x] = CELL_EMPTY;
+        }
+    }
+}
 
 Board* createBoard(int x, int y, uint32_t size) {
-    Board* board = malloc(sizeof(Board));
+    Board* board = (Board*)malloc(sizeof(Board));
 
     if (board != NULL) {
         board->cell_count = BOARD_CELL_COUNT;
@@ -23,46 +34,70 @@ Board* createBoard(int x, int y, uint32_t size) {
         board->pos_x = x;
         board->pos_y = y;
         board->size = size;
+        initializeBoardCellArray(board);
     }
 
     return board;
 }
 
-SDL_bool boardHandleMouseMotion(Board* board, int32_t mx, int32_t my) {
-    float line_gap = board->size / ((float)board->cell_count + 2.0f);
-    int x = (mx - board->pos_x - (int)line_gap/2) / (int)line_gap;
-    if (0 <= x && x <= BOARD_CELL_COUNT) {
-        int y = (my - board->pos_y - (int)line_gap/2) / (int)line_gap;
-        if (0 <= y && y <= BOARD_CELL_COUNT) {
-            board->selected_col = x;
-            board->selected_row = y;
-        }
-    }
-    return SDL_FALSE;
+int boardSetCell(Board* board, size_t x, size_t y, BoardCell cell) {
+    if (x > board->cell_count || y > board->cell_count || cell == CELL_EMPTY)
+        return 0;
+
+    if (board->cells[y][x] != CELL_EMPTY)
+        return 0;
+
+    board->cells[y][x] = cell;
+    return 1;
 }
 
-SDL_bool boardHandleKeyDown(Board* board, SDL_Keycode key) {
-    if (key == SDLK_LEFT) {
-        board->selected_col = board->selected_col == 0 ? BOARD_CELL_COUNT : board->selected_col - 1;
-        return SDL_TRUE;
-    } 
-    if (key == SDLK_RIGHT)
-    {
-        board->selected_col = board->selected_col == BOARD_CELL_COUNT ? 0 : board->selected_col + 1;
-        return SDL_TRUE;
-    }
-    if (key == SDLK_UP)
-    {
-        board->selected_row = board->selected_row == 0 ? BOARD_CELL_COUNT : board->selected_row - 1;
-        return SDL_TRUE;
-    }
-    if (key == SDLK_DOWN)
-    {
-        board->selected_row = board->selected_row == BOARD_CELL_COUNT ? 0 : board->selected_row + 1;
-        return SDL_TRUE;
-    }
+size_t boardCountConnectivity(Board* board, BoardCell piece, size_t x, size_t y) {
+    if (x > board->cell_count || y > board->cell_count || board->cells[y][x] != piece)
+        return 0;
 
-    return SDL_FALSE;
+    size_t cum = 1;
+    size_t _max = 0;
+
+    // horizontal
+    int xi = (int)x;
+    while (--xi >= 0 && board->cells[y][xi] == piece) cum++;
+    xi = (int)x;
+    while (++xi <= board->cell_count && board->cells[y][xi] == piece) cum++;
+    _max = cum;
+
+    // vertical
+    cum = 1;
+    int yi = (int)y;
+    while (--yi >= 0 && board->cells[yi][x] == piece) cum++;
+    yi = (int)y;
+    while (++yi <= board->cell_count && board->cells[yi][x] == piece) cum++;
+    _max = MAX(_max, cum);
+
+    // rising diagonal
+    cum = 1;
+    xi = (int)x;
+    yi = (int)y;
+    while (--xi >= 0 && --yi >= 0 && board->cells[yi][xi] == piece) cum++;
+    xi = (int)x;
+    yi = (int)y;
+    while (++xi <= board->cell_count && ++yi <= board->cell_count && board->cells[yi][xi] == piece) cum++;
+    _max = MAX(_max, cum);
+
+    // falling diagonal
+    cum = 1;
+    xi = (int)x;
+    yi = (int)y;
+    while (--xi >= 0 && ++yi <= board->cell_count && board->cells[yi][xi] == piece) cum++;
+    xi = (int)x;
+    yi = (int)y;
+    while (++xi <= board->cell_count && --yi >= 0 && board->cells[yi][xi] == piece) cum++;
+
+    return MAX(_max, cum);
+}
+
+int boardCheckWin(Board* board, BoardCell piece, size_t x, size_t y) {
+    size_t conn = boardCountConnectivity(board, piece, x, y);
+    return conn >= 5;
 }
 
 void renderBoard(RenderContext* ctx, Board* board) {
@@ -74,8 +109,8 @@ void renderBoard(RenderContext* ctx, Board* board) {
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
 
-    SDL_Texture* tex = generateSolidTexture(rend, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-    // SDL_Texture* tex = loadTextureBMP(rend, "../assets/board.bmp");
+    // SDL_Texture* tex = generateSolidTexture(rend, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
+    SDL_Texture* tex = loadTextureBMP(rend, "../assets/board.bmp");
     SDL_RenderCopy(rend, tex, NULL, &board_rect);
     SDL_DestroyTexture(tex);
 
@@ -107,10 +142,10 @@ void renderBoard(RenderContext* ctx, Board* board) {
     }
 
     // render border lines
-    frect.x = line_gap - BORDER_WIDTH + pos_x;
-    frect.y = line_gap - BORDER_WIDTH + pos_y;
-    frect.w = (float)size - 2*line_gap + 2*BORDER_WIDTH;
-    frect.h = (float)size - 2*line_gap + 2*BORDER_WIDTH;    
+    frect.x = line_gap - 2*BORDER_WIDTH + pos_x;
+    frect.y = line_gap - 2*BORDER_WIDTH + pos_y;
+    frect.w = (float)size - 2*line_gap + 4*BORDER_WIDTH;
+    frect.h = (float)size - 2*line_gap + 4*BORDER_WIDTH;    
     drawFRectBorder(rend, &frect, BORDER_WIDTH, BORDER_TYPE_OUTER);
 
     // render dots 

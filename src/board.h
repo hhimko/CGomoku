@@ -27,9 +27,8 @@ struct Board {
 
 Board* createBoard();
 
-SDL_bool boardHandleMouseMotion(Board* board, int32_t mx, int32_t my);
-SDL_bool boardHandleKeyDown(Board* board, SDL_Keycode key);
-
+int boardSetCell(Board* board, size_t x, size_t y, BoardCell cell);
+int boardCheckWin(Board* board, BoardCell piece, size_t x, size_t y);
 void renderBoard(RenderContext* ctx, Board* board);
 
 void destroyBoard(Board* board);
