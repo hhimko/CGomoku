@@ -282,6 +282,7 @@ int initSDL(RenderContext* ctx, SDL_Window** win) {
     ctx->renderer = SDL_CreateRenderer(*win, -1, rendFlags);
     if (ctx->renderer == NULL) return -1;
 
+    SDL_SetHint("SDL_HINT_RENDER_SCALE_QUALITY", "linear");
     if (SDL_SetRenderDrawBlendMode(ctx->renderer, SDL_BLENDMODE_BLEND) < 0) return -1;
 
     return 0;

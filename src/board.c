@@ -12,6 +12,7 @@
 #define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
 #define DOT_RADIUS 4.0f
 #define BORDER_WIDTH 4.0f
+#define PIECE_SCALE 0.9f
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
@@ -162,16 +163,16 @@ void renderBoard(RenderContext* ctx, Board* board) {
     drawFilledCircleAA(rend, cx + dot_offset, cy - dot_offset, 4);
 
     // render board pieces
-    SDL_Rect piece_rect = { .w = (int)line_gap, .h = (int)line_gap };
+    SDL_Rect piece_rect = { .w = (int)(line_gap*PIECE_SCALE), .h = (int)(line_gap*PIECE_SCALE) };
 
     for (size_t y = 0; y <= board->cell_count; ++y) {
         for (size_t x = 0; x <= board->cell_count; ++x) {
             BoardCell c = board->cells[y][x];
             if (c == CELL_BLACK_PIECE) 
             {
-                piece_rect.x = pos_x + (int)(line_gap*(x + 0.5f));
-                piece_rect.y = pos_y + (int)(line_gap*(y + 0.5f));
-                SDL_RenderCopy(rend, board->black_piece_tex, NULL, &piece_rect);
+                piece_rect.x = pos_x + (int)(line_gap*(x + 0.5f + (1.0f - PIECE_SCALE)/2));
+                piece_rect.y = pos_y + (int)(line_gap*(y + 0.5f + (1.0f - PIECE_SCALE)/2));
+                SDL_RenderCopy(rend, board->white_piece_tex, NULL, &piece_rect);
             } 
             else if (c == CELL_WHITE_PIECE) 
             {

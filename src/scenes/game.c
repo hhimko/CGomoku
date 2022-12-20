@@ -55,8 +55,8 @@ int gamePrepare(AppState* state) {
     randomizeSeigaihaBackgroundDirection();
 
     uint32_t size = MIN(state->context->win_w, state->context->win_h) - 300;
-    SDL_Texture* black_piece_tex = generateSolidCircleTexture(state->context->renderer, 50, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
-    SDL_Texture* white_piece_tex = generateSolidCircleTexture(state->context->renderer, 50, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
+    SDL_Texture* black_piece_tex = generateSolidCircleTexture(state->context->renderer, 100, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+    SDL_Texture* white_piece_tex = generateSolidCircleTexture(state->context->renderer, 100, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     Board* board = createBoard(state->context->win_w/2 - size/2, state->context->win_h/2 - size/2, size, black_piece_tex, white_piece_tex);
     if (board == NULL) goto fail; // board and textures get freed in destroyGomokuGame() 
 

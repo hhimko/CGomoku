@@ -67,8 +67,13 @@ SDL_Texture* generateSolidCircleTexture(SDL_Renderer* rend, int size, uint8_t r,
     SDL_Texture* tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, size, size);
     
     if (tex != NULL && SDL_SetRenderTarget(rend, tex) >= 0) {
+        SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
+
+        SDL_SetRenderDrawColor(rend, r, g, b, 0x00);
+        SDL_RenderClear(rend);
+        
         SDL_SetRenderDrawColor(rend, r, g, b, a);
-        drawFilledCircleAA(rend, size/2, size/2, size/2 - 1);
+        drawFilledCircleAA(rend, size/2, size/2, size/2 - 2);
 
         // detach texture from renderer 
         if (SDL_SetRenderTarget(rend, NULL) >= 0) {
