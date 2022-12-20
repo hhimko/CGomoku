@@ -29,6 +29,7 @@ struct Board {
 
 Board* createBoard(int x, int y, uint32_t size, SDL_Texture* black_piece_tex, SDL_Texture* white_piece_tex);
 
+int boardWindowCoordinateToCell(Board* board, int32_t x, int32_t y, size_t* col, size_t* row);
 int boardSetCell(Board* board, size_t x, size_t y, BoardCell cell);
 int boardCheckWin(Board* board, BoardCell piece, size_t x, size_t y);
 void renderBoard(RenderContext* ctx, Board* board);

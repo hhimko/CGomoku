@@ -43,6 +43,20 @@ Board* createBoard(int x, int y, uint32_t size, SDL_Texture* black_piece_tex, SD
     return board;
 }
 
+int boardWindowCoordinateToCell(Board* board, int32_t x, int32_t y, size_t* col, size_t* row) {
+    int line_gap = (int)roundf(board->size / ((float)board->cell_count + 2.0f));
+
+    int c = (x - board->pos_x - line_gap/2) / line_gap;
+    if (c < 0 || c > board->cell_count) return 0;
+
+    int r = (y - board->pos_y - line_gap/2) / line_gap;
+    if (r < 0 || r > board->cell_count) return 0;
+
+    *col = (size_t)c;
+    *row = (size_t)r;
+    return 1;
+}
+
 int boardSetCell(Board* board, size_t x, size_t y, BoardCell cell) {
     if (x > board->cell_count || y > board->cell_count || cell == CELL_EMPTY)
         return 0;
@@ -172,7 +186,7 @@ void renderBoard(RenderContext* ctx, Board* board) {
             {
                 piece_rect.x = pos_x + (int)(line_gap*(x + 0.5f + (1.0f - PIECE_SCALE)/2));
                 piece_rect.y = pos_y + (int)(line_gap*(y + 0.5f + (1.0f - PIECE_SCALE)/2));
-                SDL_RenderCopy(rend, board->white_piece_tex, NULL, &piece_rect);
+                SDL_RenderCopy(rend, board->black_piece_tex, NULL, &piece_rect);
             } 
             else if (c == CELL_WHITE_PIECE) 
             {
