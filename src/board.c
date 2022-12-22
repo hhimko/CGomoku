@@ -8,10 +8,12 @@
 #include "./sdl/render.h"
 #include "./ui.h"
 
-#define LINE_WIDTH 2.0f
+#define LINE_WIDTH 1.0f
 #define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
-#define DOT_RADIUS 4.0f
+#define DOT_RADIUS 5.0f
 #define BORDER_WIDTH 4.0f
+#define BORDER_OFFSET 10.0f
+#define LINE_RGB 0x29, 0x1B, 0x12
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
@@ -125,12 +127,14 @@ void renderBoard(RenderContext* ctx, Board* board) {
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
 
-    // SDL_Texture* tex = generateSolidTexture(rend, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
     SDL_Texture* tex = loadTextureBMP(rend, "../assets/board.bmp");
     SDL_RenderCopy(rend, tex, NULL, &board_rect);
     SDL_DestroyTexture(tex);
 
     // render vertical grid lines 
+    uint8_t r,g,b,a;
+    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
+    SDL_SetRenderDrawColor(rend, LINE_RGB, SDL_ALPHA_OPAQUE);
     float line_gap = size / ((float)board->cell_count + 2.0f);
 
     FRect frect = {
@@ -140,7 +144,6 @@ void renderBoard(RenderContext* ctx, Board* board) {
         .h = (float)size - 2*line_gap + LINE_WIDTH
     };
 
-    SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     for (size_t vline = 0; vline < board->cell_count + 1; ++vline)
     {
         drawFilledFRect(rend, &frect);
@@ -158,22 +161,22 @@ void renderBoard(RenderContext* ctx, Board* board) {
     }
 
     // render border lines
-    frect.x = line_gap - 2*BORDER_WIDTH + pos_x;
-    frect.y = line_gap - 2*BORDER_WIDTH + pos_y;
-    frect.w = (float)size - 2*line_gap + 4*BORDER_WIDTH;
-    frect.h = (float)size - 2*line_gap + 4*BORDER_WIDTH;    
+    frect.x = line_gap - BORDER_OFFSET + pos_x;
+    frect.y = line_gap - BORDER_OFFSET + pos_y;
+    frect.w = (float)size - 2*line_gap + 2*BORDER_OFFSET;
+    frect.h = (float)size - 2*line_gap + 2*BORDER_OFFSET;    
     drawFRectBorder(rend, &frect, BORDER_WIDTH, BORDER_TYPE_OUTER);
 
     // render dots 
-    int cx = (int)roundf(pos_x + size / 2.0f - LINE_WIDTH_HALF);
-    int cy = (int)roundf(pos_y + size / 2.0f - LINE_WIDTH_HALF);
+    int cx = (int)roundf(pos_x + size / 2.0f - LINE_WIDTH_HALF - 1);
+    int cy = (int)roundf(pos_y + size / 2.0f - LINE_WIDTH_HALF - 1);
     int dot_offset = (int)roundf(line_gap * 4); // ofset from center dot
 
-    drawFilledCircleAA(rend, cx, cy, 4);
-    drawFilledCircleAA(rend, cx + dot_offset, cy + dot_offset, 4);
-    drawFilledCircleAA(rend, cx - dot_offset, cy + dot_offset, 4);
-    drawFilledCircleAA(rend, cx - dot_offset, cy - dot_offset, 4);
-    drawFilledCircleAA(rend, cx + dot_offset, cy - dot_offset, 4);
+    drawFilledCircleAA(rend, cx, cy, DOT_RADIUS);
+    drawFilledCircleAA(rend, cx + dot_offset, cy + dot_offset, DOT_RADIUS);
+    drawFilledCircleAA(rend, cx - dot_offset, cy + dot_offset, DOT_RADIUS);
+    drawFilledCircleAA(rend, cx - dot_offset, cy - dot_offset, DOT_RADIUS);
+    drawFilledCircleAA(rend, cx + dot_offset, cy - dot_offset, DOT_RADIUS);
 
     // render board pieces
     SDL_Rect piece_rect = { .w = (int)(line_gap), .h = (int)(line_gap) };
@@ -203,6 +206,8 @@ void renderBoard(RenderContext* ctx, Board* board) {
     frect.h = line_gap;
     
     renderSelectionCursorF(rend, &frect);
+
+    SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
 }
 
 void destroyBoard(Board* board){

@@ -49,8 +49,8 @@ void setGameSceneCallbacks(AppState* state) {
 }
 
 int gamePrepare(AppState* state) {
-    SDL_Color bg = { .r=0x98, .g=0x2D, .b=0x49 };
-    SDL_Color fg = { .r=0x81, .g=0x21, .b=0x36 };
+    SDL_Color bg = { .r=0xD5, .g=0x24, .b=0x3D }; 
+    SDL_Color fg = { .r=0x9E, .g=0x1A, .b=0x26 };
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
     randomizeSeigaihaBackgroundDirection();
 
