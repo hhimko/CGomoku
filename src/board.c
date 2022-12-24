@@ -26,7 +26,7 @@ void initializeBoardCellArray(Board* board) {
     }
 }
 
-Board* createBoard(int x, int y, uint32_t size, SDL_Texture* black_piece_tex, SDL_Texture* white_piece_tex) {
+Board* createBoard(int x, int y, uint32_t size, SDL_Texture* board_tex, SDL_Texture* black_piece_tex, SDL_Texture* white_piece_tex) {
     Board* board = (Board*)malloc(sizeof(Board));
 
     if (board != NULL) {
@@ -36,6 +36,7 @@ Board* createBoard(int x, int y, uint32_t size, SDL_Texture* black_piece_tex, SD
         board->pos_x = x;
         board->pos_y = y;
         board->size = size;
+        board->board_tex = board_tex;
         board->black_piece_tex = black_piece_tex;
         board->white_piece_tex = white_piece_tex;
         initializeBoardCellArray(board);
@@ -126,10 +127,7 @@ void renderBoard(RenderContext* ctx, Board* board) {
 
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
-
-    SDL_Texture* tex = loadTextureBMP(rend, "../assets/board.bmp");
-    SDL_RenderCopy(rend, tex, NULL, &board_rect);
-    SDL_DestroyTexture(tex);
+    SDL_RenderCopy(rend, board->board_tex, NULL, &board_rect);
 
     // render vertical grid lines 
     uint8_t r,g,b,a;
@@ -211,6 +209,7 @@ void renderBoard(RenderContext* ctx, Board* board) {
 }
 
 void destroyBoard(Board* board){
+    SDL_DestroyTexture(board->board_tex);
     SDL_DestroyTexture(board->black_piece_tex);
     SDL_DestroyTexture(board->white_piece_tex);
     free(board);

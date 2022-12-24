@@ -49,7 +49,6 @@ void drawFilledFRect(SDL_Renderer* rend, FRect* frect) {
     SDL_RenderFillRect(rend, &crect);
 }
 
-
 void drawFRectBorder(SDL_Renderer* rend, FRect* frect, float thickness, BorderType border_type) {
     const float off = thickness * (float)border_type / 2.0f; // offset relies on BorderType integer values 
     const float off2 = off * 2.0f;

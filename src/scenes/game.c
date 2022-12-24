@@ -54,10 +54,13 @@ int gamePrepare(AppState* state) {
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
     randomizeSeigaihaBackgroundDirection();
 
+    SDL_Texture* board_tex = loadTextureBMP(state->context->renderer, "../assets/board.bmp"); 
     SDL_Texture* black_piece_tex = loadTextureBMP(state->context->renderer, "../assets/black_piece.bmp");
     SDL_Texture* white_piece_tex = loadTextureBMP(state->context->renderer, "../assets/white_piece.bmp");
+    // SDL_Texture* shadow_test = generateShadowFromTexture(state->context->renderer, board_tex, 32, SDL_ALPHA_OPAQUE/2);
+
     uint32_t size = MIN(state->context->win_w, state->context->win_h) - 300;
-    Board* board = createBoard(state->context->win_w/2 - size/2, state->context->win_h/2 - size/2, size, black_piece_tex, white_piece_tex);
+    Board* board = createBoard(state->context->win_w/2 - size/2, state->context->win_h/2 - size/2, size, board_tex, black_piece_tex, white_piece_tex);
     if (board == NULL) goto fail; // board and textures get freed in destroyGomokuGame() 
 
     s_game = createGomokuGame(board);
