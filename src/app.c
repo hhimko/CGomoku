@@ -10,8 +10,8 @@
 #include "./ui.h"
 
 #define DEFAULT_FPS 60
-#define DEFAULT_SCREEN_WIDTH 1920
-#define DEFAULT_SCREEN_HEIGHT 1080
+#define DEFAULT_SCREEN_WIDTH 1920 - 600
+#define DEFAULT_SCREEN_HEIGHT 1080 - 200
 
 static SDL_bool s_running = SDL_FALSE;
 
