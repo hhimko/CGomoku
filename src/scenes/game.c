@@ -16,7 +16,7 @@ static GomokuGame* s_game = NULL;
 
 
 void gameUpdate(uint64_t dt) {
-    (void) dt;
+    s_game->update(s_game, dt);
 }
 
 void gameRender(RenderContext* ctx) {

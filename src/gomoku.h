@@ -13,13 +13,15 @@ typedef enum GameState {
 
 typedef struct GomokuGame GomokuGame;
 
-typedef SDL_bool (*gameHandleInputCallback)(GomokuGame* game, SDL_Event* event);
+typedef void (*gomokuGameUpdateCallback)(GomokuGame* game, uint64_t dt);
+typedef SDL_bool (*gomokuGameHandleInputCallback)(GomokuGame* game, SDL_Event* event);
 
 struct GomokuGame {
     uint16_t turn;
     GameState state;
     Board* board;
-    gameHandleInputCallback handleInput;
+    gomokuGameUpdateCallback update;
+    gomokuGameHandleInputCallback handleInput;
 };
 
 GomokuGame* createGomokuGame(Board* board);

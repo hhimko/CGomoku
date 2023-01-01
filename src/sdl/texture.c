@@ -253,13 +253,6 @@ SDL_Texture* generateSeigaihaTexture(SDL_Renderer* rend, uint32_t size, uint8_t 
 //                 }
 //             }
 
-//             // top-left corner pass
-//             // for (y=0; y < blur_radius; ++y) {
-//             //     for (x=0; x < blur_radius; ++x) {
-
-//             //     }
-//             // }
-
 //             // detach texture from renderer 
 //             if (SDL_SetRenderTarget(rend, NULL) >= 0) {
 //                 SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
