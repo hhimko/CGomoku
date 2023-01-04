@@ -7,6 +7,7 @@
 #include <SDL.h>
 
 #include "./scenes/scene.h"
+#include "./animation.h"
 #include "./ui.h"
 
 #define DEFAULT_FPS 60
@@ -107,9 +108,9 @@ int Gomoku_run(int argc, char* argv[]) {
         return -1;
     }
     
-    if (initializeUI() < 0) {
-        fprintf(stderr, "Failed to initialize UI.\n"); 
-        destroyUI();
+    if (initializeAnimationModule() < 0) {
+        fprintf(stderr, "Failed to initialize Animation Module.\n"); 
+        destroyAnimationModule();
         quitSDL(context, window);
         destroyRenderContext(context);
         return -1;
@@ -118,16 +119,23 @@ int Gomoku_run(int argc, char* argv[]) {
     AppState* state = createAppState(context, fps);
     if (state == NULL) {
         fprintf(stderr, "Failed to create AppState.\n"); 
-        destroyUI();
+        destroyAnimationModule();
         quitSDL(context, window);
         destroyRenderContext(context);
         return -1;
     }
 
+    //
+    //
+    // all actual game logic and rendering happens in mainloop
     mainloop(state, window);
+    //
+    //
+    //
 
     // free up resources after the mainloop quits
     destroyAppState(state);
+    destroyAnimationModule();
     destroyUI();
     quitSDL(context, window);
     destroyRenderContext(context);

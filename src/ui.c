@@ -8,16 +8,9 @@
 #include "./sdl/render.h"
 #include "./sdl/texture.h"
 
-
-/* SMOOTHSTEP FUNCTION  */
-#define SMOOTHSTEP_RESOLUTION 100
 #define CURSOR_ANIMATION_STEP 0.0005
 #define CURSOR_ANIMATION_STRENGTH 15.0f
 
-static double* __s_smoothstep_arr = NULL; 
-static double s_cursor_animation_t = 0.0;
-
-/* SIGAIHA BACKGROUND */
 #define SEIGAIHA_RADIUS 80
 #define SEIGAIHA_ANIMATION_STEP 0.0003
 
@@ -29,33 +22,11 @@ static int s_seigaiha_direction_y = 1;
 static double s_background_offset = 0.0;
 static SDL_Texture* s_background_texture = NULL;
 
+static double s_cursor_animation_t = 0.0;
+
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define CLAMP(a, b, x) (((x) < (a)) ? (a) : (((x) > (b)) ? (b) : (x)))
 
-
-double smoothstep(double x) {
-    int t = (int)(x * SMOOTHSTEP_RESOLUTION + 0.5);
-    return __s_smoothstep_arr[CLAMP(0, SMOOTHSTEP_RESOLUTION - 1, t)];
-}
-
-double smoothstep_inout(double x) {
-    int t = (int)((1 - fabs((x - 0.5)*2)) * SMOOTHSTEP_RESOLUTION + 0.5);
-    return __s_smoothstep_arr[CLAMP(0, SMOOTHSTEP_RESOLUTION - 1, t)];
-}
-
-int precomputeSmoothstep() {
-    __s_smoothstep_arr = malloc(sizeof(double) * SMOOTHSTEP_RESOLUTION);
-    if (__s_smoothstep_arr == NULL)
-        return -1;
-
-    for (int i = 0; i < SMOOTHSTEP_RESOLUTION; ++i) {
-        double t = (double)i / (SMOOTHSTEP_RESOLUTION - 1);
-        __s_smoothstep_arr[i] = t * t * (3.0 - t * 2.0);
-    }
-
-    return 0;
-}
 
 int loadSeigaihaBackgroundTexture(RenderContext* ctx, SDL_Color* bg, SDL_Color* fg) {
     SDL_DestroyTexture(s_background_texture);
@@ -190,7 +161,7 @@ void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, do
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
     static const float thickness = 10.0f; 
     static const float length = 30; 
-    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)smoothstep_inout(s_cursor_animation_t); 
+    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)s_cursor_animation_t; 
 
     uint8_t r,g,b,a;
     SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
@@ -240,7 +211,7 @@ void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
 void renderSelectionCursorF(SDL_Renderer* rend, FRect* frect) {
     static const float thickness = 10.0f; 
     static const float length = 30; 
-    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)smoothstep_inout(s_cursor_animation_t); 
+    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)s_cursor_animation_t; 
 
     uint8_t r,g,b,a;
     SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
@@ -312,17 +283,6 @@ void renderButton(SDL_Renderer* rend, Button* btn) {
     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
 }
 
-int initializeUI() {
-    s_cursor_animation_t = 0.0;
-
-    if (precomputeSmoothstep() < 0) {
-        fprintf(stderr, "Failed to precompute smoothstep array.\n");
-        return -1;
-    }
-
-    return 0;   
-}
-
 void updateUI(uint64_t dt) {
     s_cursor_animation_t = s_cursor_animation_t + CURSOR_ANIMATION_STEP*dt;
     if (s_cursor_animation_t >= 1.0) 
@@ -334,6 +294,5 @@ void updateUI(uint64_t dt) {
 }
 
 void destroyUI() {
-    free(__s_smoothstep_arr);
     SDL_DestroyTexture(s_background_texture);
 }

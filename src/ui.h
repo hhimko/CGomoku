@@ -34,7 +34,6 @@ void destroyButton(Button* btn);
 
 void renderButton(SDL_Renderer* rend, Button* btn);
 
-int initializeUI();
 void updateUI(uint64_t dt);
 void destroyUI();
 
