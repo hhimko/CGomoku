@@ -6,10 +6,11 @@
 
 typedef enum AnimationType {
     ANIMATION_TYPE_LINEAR,
-    ANIMATION_TYPE_SMOOTHSTEP
+    ANIMATION_TYPE_SMOOTHSTEP,
+    ANIMATION_TYPE_SMOOTHSTEP_INOUT
 } AnimationType;
 
-void pushAnimation(double* pvar, AnimationType animation_type, int looping);
+void pushAnimation(double* pvar, uint32_t duration, AnimationType type, int looping);
 void updateAnimations(uint64_t dt);
 void clearAnimations();
 

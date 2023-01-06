@@ -7,6 +7,7 @@
 #include "./menu.h"
 #include "./game.h"
 #include "./options.h"
+#include "../animation.h"
 
 
 void defaultSceneUpdateCallback(uint64_t dt) { 
@@ -35,6 +36,9 @@ void setDefaultSceneCallbacks(AppState* state) {
 int setScene(AppState* state, SceneState new_scene_state) {
     if (state->scene.destroy != NULL) // scene destroy callback has to be null-initialized before setScene
         state->scene.destroy(); 
+
+    clearAnimations(); // scene switching clears all queued up animations for the next scene
+
     state->scene.state = new_scene_state;
     setDefaultSceneCallbacks(state);
 

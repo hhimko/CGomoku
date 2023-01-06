@@ -74,7 +74,8 @@ void mainloop(AppState* state, SDL_Window* win) {
             Gomoku_shutdown();
 
         // update logic state
-        updateUI(f_elapsed);
+        updateUI(f_elapsed); // TODO: remove updateUI
+        updateAnimations(f_elapsed);
         state->scene.update(f_elapsed);
 
         // render game to screen
@@ -126,10 +127,8 @@ int Gomoku_run(int argc, char* argv[]) {
     }
 
     //
-    //
     // all actual game logic and rendering happens in mainloop
     mainloop(state, window);
-    //
     //
     //
 
