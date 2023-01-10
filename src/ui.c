@@ -5,14 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "./animation.h"
 #include "./sdl/render.h"
 #include "./sdl/texture.h"
 
-#define CURSOR_ANIMATION_STEP 0.0005
-#define CURSOR_ANIMATION_STRENGTH 15.0f
-
 #define SEIGAIHA_RADIUS 80
-#define SEIGAIHA_ANIMATION_STEP 0.0003
+#define CURSOR_ANIMATION_STRENGTH 15.0f
 
 static int s_seigaiha_parallax_x = 0;
 static int s_seigaiha_parallax_y = 0;
@@ -54,6 +52,10 @@ void randomizeSeigaihaBackgroundDirection() {
         s_seigaiha_direction_y *= -1;
         if (rand() % 2) s_seigaiha_direction_x *= -1;
     }
+}
+
+void pushSeigaihaAnimation() {
+    pushAnimation(&s_background_offset, 4000, ANIMATION_TYPE_LINEAR, 1);
 }
 
 void renderSeigaihaBackground(RenderContext* ctx) {
@@ -158,6 +160,10 @@ void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, do
     SDL_DestroyTexture(tatami_half);
 }
 
+void pushCursorAnimation() {
+    pushAnimation(&s_cursor_animation_t, 2000, ANIMATION_TYPE_SMOOTHSTEP_INOUT, 1);
+}
+
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
     static const float thickness = 10.0f; 
     static const float length = 30; 
@@ -260,7 +266,6 @@ void renderSelectionCursorF(SDL_Renderer* rend, FRect* frect) {
 
 Button* createButton(SDL_Rect rect, buttonCallback callback){
     Button* btn = malloc(sizeof(Button));
-
     if (btn != NULL) {
         btn->rect = rect;
         btn->callback = callback;
@@ -281,16 +286,6 @@ void renderButton(SDL_Renderer* rend, Button* btn) {
     SDL_RenderFillRect(rend, &btn->rect);
 
     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
-}
-
-void updateUI(uint64_t dt) {
-    s_cursor_animation_t = s_cursor_animation_t + CURSOR_ANIMATION_STEP*dt;
-    if (s_cursor_animation_t >= 1.0) 
-        s_cursor_animation_t -= (int)s_cursor_animation_t;
-
-    s_background_offset = s_background_offset + SEIGAIHA_ANIMATION_STEP*dt;
-    if (s_background_offset >= 1.0) 
-        s_background_offset -= (int)s_background_offset;
 }
 
 void destroyUI() {

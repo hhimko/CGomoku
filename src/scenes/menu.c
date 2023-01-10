@@ -88,6 +88,7 @@ int menuPrepare(AppState* state) {
     SDL_Color fg = { .r=0x2A, .g=0x4B, .b=0x74 };
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
     randomizeSeigaihaBackgroundDirection();
+    pushSeigaihaAnimation();
 
     int w = state->context->win_w;
     int h = state->context->win_h;

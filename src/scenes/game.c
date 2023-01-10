@@ -54,6 +54,7 @@ int gamePrepare(AppState* state) {
     SDL_Color fg = { .r=0x9E, .g=0x1A, .b=0x26 };
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
     randomizeSeigaihaBackgroundDirection();
+    pushSeigaihaAnimation();
 
     SDL_Texture* board_tex = loadTextureBMP(state->context->renderer, "../assets/board.bmp"); 
     SDL_Texture* black_piece_tex = loadTextureBMP(state->context->renderer, "../assets/black_piece.bmp");

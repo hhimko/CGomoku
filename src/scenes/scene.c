@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 
+#include "../ui.h"
 #include "../app.h"
 #include "./menu.h"
 #include "./game.h"
@@ -38,6 +39,7 @@ int setScene(AppState* state, SceneState new_scene_state) {
         state->scene.destroy(); 
 
     clearAnimations(); // scene switching clears all queued up animations for the next scene
+    pushCursorAnimation();
 
     state->scene.state = new_scene_state;
     setDefaultSceneCallbacks(state);

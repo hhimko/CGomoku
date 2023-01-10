@@ -74,7 +74,6 @@ void mainloop(AppState* state, SDL_Window* win) {
             Gomoku_shutdown();
 
         // update logic state
-        updateUI(f_elapsed); // TODO: remove updateUI
         updateAnimations(f_elapsed);
         state->scene.update(f_elapsed);
 

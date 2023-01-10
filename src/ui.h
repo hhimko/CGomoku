@@ -8,6 +8,7 @@
 
 int loadSeigaihaBackgroundTexture(RenderContext* ctx, SDL_Color* bg, SDL_Color* fg);
 void randomizeSeigaihaBackgroundDirection();
+void pushSeigaihaAnimation();
 void updateSeigaihaBackgroundParallax(RenderContext* ctx, int32_t mouse_x, int32_t mouse_y);
 void renderSeigaihaBackground(RenderContext* ctx);
 
@@ -17,6 +18,7 @@ void renderSeigaihaBackground(RenderContext* ctx);
  */
 void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, double offset_y);
 
+void pushCursorAnimation();
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect);
 void renderSelectionCursorF(SDL_Renderer* rend, FRect* frect);
 
@@ -34,7 +36,6 @@ void destroyButton(Button* btn);
 
 void renderButton(SDL_Renderer* rend, Button* btn);
 
-void updateUI(uint64_t dt);
 void destroyUI();
 
 #endif /* UI_H_ */

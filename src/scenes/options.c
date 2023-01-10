@@ -59,6 +59,7 @@ int optionsPrepare(AppState* state) {
     SDL_Color fg = { .r=0x31, .g=0x9E, .b=0x76 };
     if (loadSeigaihaBackgroundTexture(state->context, &bg, &fg) < 0) goto fail;
     randomizeSeigaihaBackgroundDirection();
+    pushSeigaihaAnimation();
 
     int w = state->context->win_w;
     int h = state->context->win_h;

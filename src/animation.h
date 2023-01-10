@@ -17,4 +17,4 @@ void clearAnimations();
 int initializeAnimationModule();
 void destroyAnimationModule();
 
-#endif // _ANIMATION_H
+#endif /* _ANIMATION_H */
