@@ -28,7 +28,12 @@ SDL_Texture* generateSolidTexture(SDL_Renderer* rend, uint8_t r, uint8_t g, uint
 SDL_Texture* generateSolidCircleTexture(SDL_Renderer* rend, int size, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 SDL_Texture* generateSeigaihaTexture(SDL_Renderer* rend, uint32_t size, uint8_t ring_count, double ring_thickness, SDL_Color* bg_color,  SDL_Color* fg_color);
 
-// SDL_Texture* generateShadowFromTexture(SDL_Renderer* rend, SDL_Texture* tex, int blur_radius, uint8_t strength);
+/* 
+ * Generates a drop-shadow texture from an existing texture, based on its alpha channel.
+ * The function is not efficient enough to be called frequently, because of the inner call to `getTexturePixelArray`.
+ * The separated box blur kernel is used with accumulation for optimization.  
+ */
+SDL_Texture* generateShadowFromTexture(SDL_Renderer* rend, SDL_Texture* tex, int blur_radius, uint8_t strength);
 
 void renderTextureRepeat(SDL_Renderer* rend, SDL_Texture* tex, const SDL_Rect* dstrect);
 

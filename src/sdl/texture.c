@@ -179,99 +179,104 @@ SDL_Texture* generateSeigaihaTexture(SDL_Renderer* rend, uint32_t size, uint8_t 
     return NULL;
 }
 
-// SDL_Texture* generateShadowFromTexture(SDL_Renderer* rend, SDL_Texture* tex, int blur_radius, uint8_t strength) {
-//     int tex_w, tex_h; 
-//     uint32_t* tex_pixeldata = getTexturePixelArray(rend, tex, &tex_w, &tex_h);
-    
-//     if (tex_pixeldata == NULL) {
-//         fprintf(stderr, "Failed to generate shadow from texture. \nSDL_Error: %s\n", SDL_GetError());
-//         return NULL;
-//     }
+SDL_Texture* generateShadowFromTexture(SDL_Renderer* rend, SDL_Texture* tex, int blur_radius, uint8_t strength) {
+    // static const unsigned DOWNSCALE_FACTOR = 2;    
+    int tex_w, tex_h; 
+    uint32_t* tex_pixeldata = getTexturePixelArray(rend, tex, &tex_w, &tex_h);
+    if (tex_pixeldata == NULL) goto shadow_fail_0;
 
-//     uint8_t r,g,b,a;
-//     SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
 
-//     const int blur_width = 2*blur_radius;
-//     const int shadow_w = tex_w + blur_width;
-//     const int shadow_h = tex_h + blur_width;
+    const int blur_width = 2*blur_radius;
+    const int shadow_w = tex_w + blur_width;
+    const int shadow_h = tex_h + blur_width;
 
-//     SDL_Texture* shadow_tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, shadow_w, shadow_h);
-//     if (shadow_tex != NULL && SDL_SetRenderTarget(rend, shadow_tex) >= 0) {
-//         SDL_SetTextureBlendMode(shadow_tex, SDL_BLENDMODE_BLEND);
-                
-//         const double s = strength / (double)(blur_width + 1);// strength / pow(2.0*blur_radius + 1.0, 2.0);
-//         int x,y,array_offset;
-//         uint32_t alpha;
-//         double acc;
+    uint8_t* alpha_buffer = calloc(shadow_h*shadow_w, sizeof(uint8_t)); // horizontal blur pass output buffer
+    if (alpha_buffer == NULL) goto shadow_fail_0;
 
-//         // horizontal pass
-//         for (y=0; y < tex_h; ++y) {
-//             array_offset = y*tex_w;
-//             acc = 0.0;
 
-//             for (x=0; x < shadow_w; ++x) {
-//                 if (x < tex_w) {
-//                     alpha = (tex_pixeldata[array_offset + x] >> 24) & 0xFF;
-//                     if (alpha == SDL_ALPHA_OPAQUE) acc += s;
-//                 }
+    // output texture, drawn to in vertical pass
+    SDL_Texture* shadow_tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, shadow_w, shadow_h);
+    if (shadow_tex == NULL || SDL_SetRenderTarget(rend, shadow_tex) < 0) goto shadow_fail_1;
 
-//                 SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, (uint8_t)acc);
-//                 SDL_RenderDrawPoint(rend, x, y + blur_radius);
+    uint8_t r,g,b,a;
+    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
 
-//                 // subtract the leftmost kernel value for the next pass
-//                 if (x >= blur_width) {
-//                     alpha = (tex_pixeldata[array_offset + x - blur_width] >> 24) & 0xFF;
-//                     if (alpha == SDL_ALPHA_OPAQUE) acc -= s;
-//                 }
-//             }
-//         }
-
-//         // vertical pass
-//         uint32_t* shadow_pixeldata = getTexturePixelArray(rend, shadow_tex, NULL, NULL);
-//         if (shadow_pixeldata != NULL && SDL_SetRenderTarget(rend, shadow_tex) >= 0) {
+    SDL_SetTextureBlendMode(shadow_tex, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0x00);
+    SDL_RenderClear(rend); // fill the shadow texture with transparent pixels
             
-//             int blur_array_offset = blur_radius*shadow_w;
-//             for (x=0; x < shadow_w; ++x) {
-//                 acc = 0.0;
 
-//                 for (y=0; y < shadow_h; ++y) {
-//                     array_offset = y*shadow_w;
+    const double w = 1.0/(blur_width + 1)*strength/SDL_ALPHA_OPAQUE; // weight multiplier for a single blur kernel cell
+    int x,y,array_offset;
+    uint32_t alpha;
+    double acc;
 
-//                     if (y < shadow_h - blur_radius) {
-//                         alpha = (shadow_pixeldata[array_offset + blur_array_offset + x] >> 24) & 0xFF;
-//                         acc += alpha/strength;
-//                     }
 
-//                     SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, (uint8_t)acc);
-//                     SDL_RenderDrawPoint(rend, x, y);
+    // horizontal blur pass
+    for (y=0; y < tex_h; ++y) {
+        array_offset = y*tex_w;
+        acc = 0.0;
 
-//                     // subtract the topmost kernel value for the next pass
-//                     if (y >= blur_radius) {
-//                         alpha = (shadow_pixeldata[array_offset - blur_array_offset + x] >> 24) & 0xFF;
-//                         acc -= alpha/strength;
-//                     }
-//                 }
-//             }
+        for (x=0; x < shadow_w; ++x) {
+            if (x < tex_w) {
+                alpha = (tex_pixeldata[array_offset + x] >> 24) & 0xFF;
+                acc += alpha*w;
+            }
 
-//             // detach texture from renderer 
-//             if (SDL_SetRenderTarget(rend, NULL) >= 0) {
-//                 SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
-//                 free(shadow_pixeldata);
-//                 free(tex_pixeldata);
-//                 return shadow_tex;
-//             }
-//         }
+            alpha_buffer[(y + blur_radius)*shadow_w + x] = (uint8_t)acc; // draw to the buffer
 
-//         free(shadow_pixeldata);
-//     }
+            // subtract the leftmost kernel value for the next pass
+            if (x >= blur_width) {
+                alpha = (tex_pixeldata[array_offset + x - blur_width] >> 24) & 0xFF;
+                acc -= alpha*w;
+            }
+        }
+    }
 
-//     fprintf(stderr, "Failed to generate shadow from texture. \nSDL_Error: %s\n", SDL_GetError());
-//     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
-//     SDL_SetRenderTarget(rend, NULL);
-//     SDL_DestroyTexture(shadow_tex);
-//     free(tex_pixeldata);
-//     return NULL;
-// }
+
+    // vertical blur pass
+    int blur_array_offset = blur_radius*shadow_w;
+    for (x=0; x < shadow_w; ++x) {
+        acc = 0.0;
+
+        for (y=0; y < shadow_h; ++y) {
+            array_offset = y*shadow_w;
+
+            if (y < shadow_h - blur_radius) {
+                alpha = alpha_buffer[array_offset + blur_array_offset + x];
+                acc += alpha*w;
+            }
+
+            SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, (uint8_t)acc);
+            SDL_RenderDrawPoint(rend, x, y);
+
+            // subtract the topmost kernel value for the next pass
+            if (y >= blur_radius) {
+                alpha = alpha_buffer[array_offset - blur_array_offset + x];
+                acc -= alpha*w;
+            }
+        }
+    }
+
+    SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
+
+    // detach texture from renderer 
+    if (SDL_SetRenderTarget(rend, NULL) >= 0) {
+        free(alpha_buffer);
+        free(tex_pixeldata);
+        return shadow_tex;
+    }
+
+
+shadow_fail_1:
+    SDL_SetRenderTarget(rend, NULL); // detach texture from renderer 
+    SDL_DestroyTexture(shadow_tex);
+    free(alpha_buffer);
+    free(tex_pixeldata);
+shadow_fail_0:
+    fprintf(stderr, "Failed to generate shadow from texture. \nSDL_Error: %s\n", SDL_GetError());
+    return NULL;
+}
 
 void renderTextureRepeat(SDL_Renderer* rend, SDL_Texture* tex, const SDL_Rect* dstrect) {
     int tex_w, tex_h;

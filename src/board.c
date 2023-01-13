@@ -8,6 +8,9 @@
 #include "./sdl/render.h"
 #include "./ui.h"
 
+#define SHADOW_RADIUS 32
+#define SHADOW_STRENGHT 200
+
 #define LINE_WIDTH 1.0f
 #define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
 #define DOT_RADIUS 5.0f
@@ -26,19 +29,22 @@ void initializeBoardCellArray(Board* board) {
     }
 }
 
-Board* createBoard(int x, int y, uint32_t size, SDL_Texture* board_tex, SDL_Texture* black_piece_tex, SDL_Texture* white_piece_tex) {
+Board* createBoard(RenderContext* ctx, int x, int y, uint32_t size) {
     Board* board = (Board*)malloc(sizeof(Board));
 
     if (board != NULL) {
         board->cell_count = BOARD_CELL_COUNT;
         board->selected_row = 0;
         board->selected_col = 0;
+        
         board->pos_x = x;
         board->pos_y = y;
         board->size = size;
-        board->board_tex = board_tex;
-        board->black_piece_tex = black_piece_tex;
-        board->white_piece_tex = white_piece_tex;
+
+        board->board_tex = loadTextureBMP(ctx->renderer, "../assets/board.bmp");
+        board->board_shadow_tex = generateShadowFromTexture(ctx->renderer, board->board_tex, SHADOW_RADIUS, SHADOW_STRENGHT);
+        board->black_piece_tex = loadTextureBMP(ctx->renderer, "../assets/black_piece.bmp");
+        board->white_piece_tex = loadTextureBMP(ctx->renderer, "../assets/white_piece.bmp");
         initializeBoardCellArray(board);
     }
 
@@ -124,6 +130,10 @@ void renderBoard(RenderContext* ctx, Board* board) {
     int pos_x = board->pos_x;
     int pos_y = board->pos_y;
     uint32_t size = board->size;
+
+    // render the board shadow
+    SDL_Rect shadow_rect = {pos_x - SHADOW_RADIUS, pos_y - SHADOW_RADIUS, size + 2*SHADOW_RADIUS, size + 2*SHADOW_RADIUS};
+    SDL_RenderCopy(rend, board->board_shadow_tex, NULL, &shadow_rect);
 
     // render the board bounding box bg
     SDL_Rect board_rect = {pos_x, pos_y, size, size};
