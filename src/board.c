@@ -8,8 +8,15 @@
 #include "./sdl/render.h"
 #include "./ui.h"
 
-#define SHADOW_RADIUS 32
-#define SHADOW_STRENGHT 200
+#define BOARD_SHADOW_RADIUS 32
+#define BOARD_SHADOW_STRENGHT 160
+#define BOARD_SHADOW_OFFSET_X -16
+#define BOARD_SHADOW_OFFSET_Y 16
+
+#define PIECE_SHADOW_RADIUS 2
+#define PIECE_SHADOW_STRENGHT 120
+#define PIECE_SHADOW_OFFSET_X 0
+#define PIECE_SHADOW_OFFSET_Y 1
 
 #define LINE_WIDTH 1.0f
 #define LINE_WIDTH_HALF LINE_WIDTH / 2.0f
@@ -42,9 +49,20 @@ Board* createBoard(RenderContext* ctx, int x, int y, uint32_t size) {
         board->size = size;
 
         board->board_tex = loadTextureBMP(ctx->renderer, "../assets/board.bmp");
-        board->board_shadow_tex = generateShadowFromTexture(ctx->renderer, board->board_tex, SHADOW_RADIUS, SHADOW_STRENGHT);
+        board->board_shadow_tex = generateShadowFromTexture(
+            ctx->renderer, board->board_tex, BOARD_SHADOW_RADIUS, BOARD_SHADOW_STRENGHT
+        );
+
         board->black_piece_tex = loadTextureBMP(ctx->renderer, "../assets/black_piece.bmp");
+        board->black_piece_shadow_tex = generateShadowFromTexture(
+            ctx->renderer, board->black_piece_tex, PIECE_SHADOW_RADIUS, PIECE_SHADOW_STRENGHT
+        );
+
         board->white_piece_tex = loadTextureBMP(ctx->renderer, "../assets/white_piece.bmp");
+        board->white_piece_shadow_tex = generateShadowFromTexture(
+            ctx->renderer, board->white_piece_tex, PIECE_SHADOW_RADIUS, PIECE_SHADOW_STRENGHT
+        );
+
         initializeBoardCellArray(board);
     }
 
@@ -80,44 +98,44 @@ size_t boardCountConnectivity(Board* board, BoardCell piece, size_t x, size_t y)
     if (x > board->cell_count || y > board->cell_count || board->cells[y][x] != piece)
         return 0;
 
-    size_t cum = 1;
+    size_t acc = 1;
     size_t _max = 0;
 
     // horizontal
     int xi = (int)x;
-    while (--xi >= 0 && board->cells[y][xi] == piece) cum++;
+    while (--xi >= 0 && board->cells[y][xi] == piece) acc++;
     xi = (int)x;
-    while (++xi <= board->cell_count && board->cells[y][xi] == piece) cum++;
-    _max = cum;
+    while (++xi <= board->cell_count && board->cells[y][xi] == piece) acc++;
+    _max = acc;
 
     // vertical
-    cum = 1;
+    acc = 1;
     int yi = (int)y;
-    while (--yi >= 0 && board->cells[yi][x] == piece) cum++;
+    while (--yi >= 0 && board->cells[yi][x] == piece) acc++;
     yi = (int)y;
-    while (++yi <= board->cell_count && board->cells[yi][x] == piece) cum++;
-    _max = MAX(_max, cum);
+    while (++yi <= board->cell_count && board->cells[yi][x] == piece) acc++;
+    _max = MAX(_max, acc);
 
     // rising diagonal
-    cum = 1;
+    acc = 1;
     xi = (int)x;
     yi = (int)y;
-    while (--xi >= 0 && --yi >= 0 && board->cells[yi][xi] == piece) cum++;
+    while (--xi >= 0 && --yi >= 0 && board->cells[yi][xi] == piece) acc++;
     xi = (int)x;
     yi = (int)y;
-    while (++xi <= board->cell_count && ++yi <= board->cell_count && board->cells[yi][xi] == piece) cum++;
-    _max = MAX(_max, cum);
+    while (++xi <= board->cell_count && ++yi <= board->cell_count && board->cells[yi][xi] == piece) acc++;
+    _max = MAX(_max, acc);
 
     // falling diagonal
-    cum = 1;
+    acc = 1;
     xi = (int)x;
     yi = (int)y;
-    while (--xi >= 0 && ++yi <= board->cell_count && board->cells[yi][xi] == piece) cum++;
+    while (--xi >= 0 && ++yi <= board->cell_count && board->cells[yi][xi] == piece) acc++;
     xi = (int)x;
     yi = (int)y;
-    while (++xi <= board->cell_count && --yi >= 0 && board->cells[yi][xi] == piece) cum++;
+    while (++xi <= board->cell_count && --yi >= 0 && board->cells[yi][xi] == piece) acc++;
 
-    return MAX(_max, cum);
+    return MAX(_max, acc);
 }
 
 int boardCheckWin(Board* board, BoardCell piece, size_t x, size_t y) {
@@ -132,7 +150,12 @@ void renderBoard(RenderContext* ctx, Board* board) {
     uint32_t size = board->size;
 
     // render the board shadow
-    SDL_Rect shadow_rect = {pos_x - SHADOW_RADIUS, pos_y - SHADOW_RADIUS, size + 2*SHADOW_RADIUS, size + 2*SHADOW_RADIUS};
+    SDL_Rect shadow_rect = {
+        pos_x - BOARD_SHADOW_RADIUS + BOARD_SHADOW_OFFSET_X, 
+        pos_y - BOARD_SHADOW_RADIUS + BOARD_SHADOW_OFFSET_Y, 
+        size + 2*BOARD_SHADOW_RADIUS, 
+        size + 2*BOARD_SHADOW_RADIUS
+    };
     SDL_RenderCopy(rend, board->board_shadow_tex, NULL, &shadow_rect);
 
     // render the board bounding box bg
@@ -188,6 +211,10 @@ void renderBoard(RenderContext* ctx, Board* board) {
 
     // render board pieces
     SDL_Rect piece_rect = { .w = (int)(line_gap), .h = (int)(line_gap) };
+    SDL_Rect piece_shadow_rect = { 
+        .w = piece_rect.w + 2*PIECE_SHADOW_RADIUS, 
+        .h = piece_rect.h + 2*PIECE_SHADOW_RADIUS 
+    };
 
     for (size_t y = 0; y <= board->cell_count; ++y) {
         for (size_t x = 0; x <= board->cell_count; ++x) {
@@ -196,12 +223,22 @@ void renderBoard(RenderContext* ctx, Board* board) {
             {
                 piece_rect.x = pos_x + (int)(line_gap*(x + 0.5f));
                 piece_rect.y = pos_y + (int)(line_gap*(y + 0.5f));
+
+                piece_shadow_rect.x = piece_rect.x - PIECE_SHADOW_RADIUS + PIECE_SHADOW_OFFSET_X;
+                piece_shadow_rect.y = piece_rect.y - PIECE_SHADOW_RADIUS + PIECE_SHADOW_OFFSET_Y;
+                
+                SDL_RenderCopy(rend, board->black_piece_shadow_tex, NULL, &piece_shadow_rect);
                 SDL_RenderCopy(rend, board->black_piece_tex, NULL, &piece_rect);
             } 
             else if (c == CELL_WHITE_PIECE) 
             {
                 piece_rect.x = pos_x + (int)(line_gap*(x + 0.5f));
                 piece_rect.y = pos_y + (int)(line_gap*(y + 0.5f));
+
+                piece_shadow_rect.x = piece_rect.x - PIECE_SHADOW_RADIUS + PIECE_SHADOW_OFFSET_X;
+                piece_shadow_rect.y = piece_rect.y - PIECE_SHADOW_RADIUS + PIECE_SHADOW_OFFSET_Y;
+                
+                SDL_RenderCopy(rend, board->white_piece_shadow_tex, NULL, &piece_shadow_rect);
                 SDL_RenderCopy(rend, board->white_piece_tex, NULL, &piece_rect);
             }
         }
@@ -212,7 +249,6 @@ void renderBoard(RenderContext* ctx, Board* board) {
     frect.y = pos_y + (board->selected_row + 0.5f) * line_gap;
     frect.w = line_gap;
     frect.h = line_gap;
-    
     renderSelectionCursorF(rend, &frect);
 
     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color

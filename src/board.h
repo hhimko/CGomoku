@@ -27,7 +27,9 @@ struct Board {
     SDL_Texture* board_tex;
     SDL_Texture* board_shadow_tex;
     SDL_Texture* black_piece_tex;
+    SDL_Texture* black_piece_shadow_tex;
     SDL_Texture* white_piece_tex;
+    SDL_Texture* white_piece_shadow_tex;
 };
 
 Board* createBoard(RenderContext* ctx, int x, int y, uint32_t size);
