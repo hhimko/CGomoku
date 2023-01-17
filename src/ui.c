@@ -12,10 +12,16 @@
 #define SEIGAIHA_RADIUS 80
 #define CURSOR_ANIMATION_STRENGTH 15.0f
 
-#define BUTTON_SHADOW_RADIUS 24
-#define BUTTON_SHADOW_STRENGTH 180
-#define BUTTON_SHADOW_OFFSET_X -12
-#define BUTTON_SHADOW_OFFSET_Y 12
+#define BUTTON_FRAME_COLOR             0x52, 0x47, 0x3C
+#define BUTTON_FRAME_BEVEL_LIGHT_COLOR 0x7C, 0x6E, 0x59
+#define BUTTON_FRAME_BEVEL_DARK_COLOR  0x2E, 0x26, 0x1E
+#define BUTTON_FRAME_BEVEL_THICKNESS   2
+
+#define BUTTON_SHADOW_RADIUS 8
+#define BUTTON_SHADOW_STRENGTH 140
+#define BUTTON_SHADOW_OFFSET_X -6
+#define BUTTON_SHADOW_OFFSET_Y 6
+
 
 static int s_seigaiha_parallax_x = 0;
 static int s_seigaiha_parallax_y = 0;
@@ -279,39 +285,93 @@ SDL_Texture* createButtonTexture(SDL_Renderer* rend, SDL_Rect* rect) {
     if (SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND) < 0) goto button_tex_fail;
 
     // fill texture with transparent pixels
-    SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0x00);
+    SDL_SetRenderDrawColor(rend, 0x52, 0x47, 0x3C, SDL_ALPHA_TRANSPARENT);
     SDL_RenderClear(rend);
 
+
     // render button center
-    static const int o = 14;
-    SDL_Rect drawrect = { .x = o, .y = o, .w = rect->w - 2*o, .h = rect->h - 2*o };
+    static const float o = 15.0f;
+    FRect drawrect = { .x = o*1.5f, .y = o*1.5f, .w = rect->w - 3*o, .h = rect->h - 3*o };
 
     SDL_SetRenderDrawColor(rend, 0xE7, 0xE6, 0xDE, SDL_ALPHA_OPAQUE);
-    SDL_RenderFillRect(rend, &drawrect);
+    drawFilledFRect(rend, &drawrect);
     
+
     // render button frame 
-    SDL_SetRenderDrawColor(rend, 0x52, 0x47, 0x3C, SDL_ALPHA_OPAQUE);
-    
+    static const int bevel_light_sides = BORDER_SIDES_TOP | BORDER_SIDES_RIGHT;
+    static const int bevel_dark_sides = BORDER_SIDES_BOTTOM | BORDER_SIDES_LEFT;
+
+    // top
     drawrect.x = 0;
     drawrect.y = o;
-    drawrect.w = rect->w;
+    drawrect.w = (float)rect->w;
     drawrect.h = o;
-    SDL_RenderFillRect(rend, &drawrect);
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_COLOR, SDL_ALPHA_OPAQUE);
+    drawFilledFRect(rend, &drawrect);
 
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_BEVEL_DARK_COLOR, SDL_ALPHA_OPAQUE);
+    drawFRectBorder(rend, &drawrect, BUTTON_FRAME_BEVEL_THICKNESS, BORDER_TYPE_INNER, bevel_dark_sides);
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_BEVEL_LIGHT_COLOR, SDL_ALPHA_OPAQUE);
+    drawFRectBorder(rend, &drawrect, BUTTON_FRAME_BEVEL_THICKNESS, BORDER_TYPE_INNER, bevel_light_sides);
+
+    // bottom
     drawrect.y = rect->h - 2*o;
-    SDL_RenderFillRect(rend, &drawrect);
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_COLOR, SDL_ALPHA_OPAQUE);
+    drawFilledFRect(rend, &drawrect);
 
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_BEVEL_DARK_COLOR, SDL_ALPHA_OPAQUE);
+    drawFRectBorder(rend, &drawrect, BUTTON_FRAME_BEVEL_THICKNESS, BORDER_TYPE_INNER, bevel_dark_sides);
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_BEVEL_LIGHT_COLOR, SDL_ALPHA_OPAQUE);
+    drawFRectBorder(rend, &drawrect, BUTTON_FRAME_BEVEL_THICKNESS, BORDER_TYPE_INNER, bevel_light_sides);
+
+    // left
     drawrect.x = o;
     drawrect.y = 0;
     drawrect.w = o;
-    drawrect.h = rect->h;
-    SDL_RenderFillRect(rend, &drawrect);
+    drawrect.h = (float)rect->h;
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_COLOR, SDL_ALPHA_OPAQUE);
+    drawFilledFRect(rend, &drawrect);
 
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_BEVEL_DARK_COLOR, SDL_ALPHA_OPAQUE);
+    drawFRectBorder(rend, &drawrect, BUTTON_FRAME_BEVEL_THICKNESS, BORDER_TYPE_INNER, bevel_dark_sides);
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_BEVEL_LIGHT_COLOR, SDL_ALPHA_OPAQUE);
+    drawFRectBorder(rend, &drawrect, BUTTON_FRAME_BEVEL_THICKNESS, BORDER_TYPE_INNER, bevel_light_sides);
+
+    // right
     drawrect.x = rect->w - 2*o;
-    SDL_RenderFillRect(rend, &drawrect);
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_COLOR, SDL_ALPHA_OPAQUE);
+    drawFilledFRect(rend, &drawrect);
+
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_BEVEL_DARK_COLOR, SDL_ALPHA_OPAQUE);
+    drawFRectBorder(rend, &drawrect, BUTTON_FRAME_BEVEL_THICKNESS, BORDER_TYPE_INNER, bevel_dark_sides);
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_BEVEL_LIGHT_COLOR, SDL_ALPHA_OPAQUE);
+    drawFRectBorder(rend, &drawrect, BUTTON_FRAME_BEVEL_THICKNESS, BORDER_TYPE_INNER, bevel_light_sides);
+
+
+    // draw over the overlapping bevel lines
+    SDL_SetRenderDrawColor(rend, BUTTON_FRAME_COLOR, SDL_ALPHA_OPAQUE);
+
+    // top-left
+    drawrect.x = o - 1;
+    drawrect.y = o + BUTTON_FRAME_BEVEL_THICKNESS + 1;
+    drawrect.w = o + 2;
+    drawrect.h = o - 2*BUTTON_FRAME_BEVEL_THICKNESS - 2;
+    drawFilledFRect(rend, &drawrect);
+
+    // top-right
+    drawrect.x = rect->w - 2*drawrect.x - 4;
+    drawFilledFRect(rend, &drawrect);
+
+    // bottom-right
+    drawrect.y = rect->h - 2*o + BUTTON_FRAME_BEVEL_THICKNESS + 1;
+    drawFilledFRect(rend, &drawrect);
+
+    // bottom-left
+    drawrect.x = o - 1;
+    drawFilledFRect(rend, &drawrect);
+    
     
     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
-
     // detach texture from renderer 
     if (SDL_SetRenderTarget(rend, NULL) >= 0) {
         return tex;

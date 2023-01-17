@@ -3,6 +3,12 @@
 
 #include <SDL.h>
 
+#define BORDER_SIDES_TOP    0b0001
+#define BORDER_SIDES_BOTTOM 0b0010
+#define BORDER_SIDES_LEFT   0b0100
+#define BORDER_SIDES_RIGHT  0b1000
+#define BORDER_SIDES_ALL    0b1111
+
 
 typedef struct FRect FRect;
 
@@ -34,7 +40,7 @@ typedef enum {
 } BorderType;
 
 void drawFilledFRect(SDL_Renderer* rend, FRect* frect);
-void drawFRectBorder(SDL_Renderer* rend, FRect* frect, float thickness, BorderType border_type);
+void drawFRectBorder(SDL_Renderer* rend, FRect* frect, float thickness, BorderType border_type, int sides);
 
 void drawCircleAA(SDL_Renderer* rend, int x, int y, double rad);
 void drawFilledCircleAA(SDL_Renderer* rend, int x, int y, double rad);

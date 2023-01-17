@@ -48,7 +48,7 @@ void drawFilledFRect(SDL_Renderer* rend, FRect* frect) {
     SDL_RenderFillRect(rend, &crect);
 }
 
-void drawFRectBorder(SDL_Renderer* rend, FRect* frect, float thickness, BorderType border_type) {
+void drawFRectBorder(SDL_Renderer* rend, FRect* frect, float thickness, BorderType border_type, int sides) {
     const float off = thickness * (float)border_type / 2.0f; // offset relies on BorderType integer values 
     const float off2 = off * 2.0f;
 
@@ -60,21 +60,30 @@ void drawFRectBorder(SDL_Renderer* rend, FRect* frect, float thickness, BorderTy
     };
 
     // top
-    drawFilledFRect(rend, &line_frect);
+    if (sides & BORDER_SIDES_TOP) {
+        drawFilledFRect(rend, &line_frect);
+    }
 
     // bottom
-    line_frect.y += frect->h + off2 - thickness; 
-    drawFilledFRect(rend, &line_frect);
+    if (sides & BORDER_SIDES_BOTTOM) {
+        line_frect.y += frect->h + off2 - thickness; 
+        drawFilledFRect(rend, &line_frect);
+    }
 
     // left
     line_frect.y = frect->y - off;
     line_frect.w = thickness;
     line_frect.h = frect->h + off2;
-    drawFilledFRect(rend, &line_frect);
+
+    if (sides & BORDER_SIDES_LEFT) {
+        drawFilledFRect(rend, &line_frect);
+    }
 
     // right
-    line_frect.x += frect->w + off2 - thickness;
-    drawFilledFRect(rend, &line_frect);
+    if (sides & BORDER_SIDES_RIGHT) {
+        line_frect.x += frect->w + off2 - thickness;
+        drawFilledFRect(rend, &line_frect);
+    }
 }
 
 void drawCircleAA(SDL_Renderer* rend, int x, int y, double rad) {

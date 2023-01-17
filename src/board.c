@@ -196,7 +196,7 @@ void renderBoard(RenderContext* ctx, Board* board) {
     frect.y = line_gap - BORDER_OFFSET + pos_y;
     frect.w = (float)size - 2*line_gap + 2*BORDER_OFFSET;
     frect.h = (float)size - 2*line_gap + 2*BORDER_OFFSET;    
-    drawFRectBorder(rend, &frect, BORDER_WIDTH, BORDER_TYPE_OUTER);
+    drawFRectBorder(rend, &frect, BORDER_WIDTH, BORDER_TYPE_OUTER, BORDER_SIDES_ALL);
 
     // render dots 
     int cx = (int)roundf(pos_x + size / 2.0f - LINE_WIDTH_HALF - 1);
