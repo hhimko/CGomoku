@@ -12,9 +12,9 @@
 #define MENU_BUTTON_EXIT   2
 #define MENU_BUTTONS_COUNT 3
 
-#define BUTTON_WIDTH  700
-#define BUTTON_HEIGHT 120
-#define BUTTON_GAP    80
+#define BUTTON_WIDTH  600
+#define BUTTON_HEIGHT 160
+#define BUTTON_GAP    40
 
 
 static Button* s_buttons[MENU_BUTTONS_COUNT] = { NULL, NULL, NULL };
@@ -100,15 +100,15 @@ int menuPrepare(AppState* state) {
     };
 
     // button play
-    s_buttons[MENU_BUTTON_PLAY] = createButton(btn_rect, buttonPlayCallback);
+    s_buttons[MENU_BUTTON_PLAY] = createButton(state->context, btn_rect, buttonPlayCallback);
 
     // button options
     btn_rect.y += BUTTON_HEIGHT + BUTTON_GAP;
-    s_buttons[MENU_BUTTON_OPTS] = createButton(btn_rect, buttonOptionsCallback);
+    s_buttons[MENU_BUTTON_OPTS] = createButton(state->context, btn_rect, buttonOptionsCallback);
 
     // button exit
     btn_rect.y += BUTTON_HEIGHT + BUTTON_GAP;
-    s_buttons[MENU_BUTTON_EXIT] = createButton(btn_rect, buttonExitCallback);
+    s_buttons[MENU_BUTTON_EXIT] = createButton(state->context, btn_rect, buttonExitCallback);
 
     s_selected_button = MENU_BUTTON_PLAY;
 

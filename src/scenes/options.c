@@ -7,8 +7,8 @@
 #include "../app.h"
 #include "../ui.h"
 
-#define BUTTON_WIDTH  700
-#define BUTTON_HEIGHT 120
+#define BUTTON_WIDTH  600
+#define BUTTON_HEIGHT 160
 
 static Button* s_return_button = NULL;
 
@@ -70,7 +70,7 @@ int optionsPrepare(AppState* state) {
         .h = BUTTON_HEIGHT 
     };
 
-    s_return_button = createButton(btn_rect, buttonReturnCallback);
+    s_return_button = createButton(state->context, btn_rect, buttonReturnCallback);
     if (s_return_button == NULL) goto fail;
 
     setOptionsSceneCallbacks(state);

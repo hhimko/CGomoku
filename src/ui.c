@@ -12,6 +12,11 @@
 #define SEIGAIHA_RADIUS 80
 #define CURSOR_ANIMATION_STRENGTH 15.0f
 
+#define BUTTON_SHADOW_RADIUS 24
+#define BUTTON_SHADOW_STRENGTH 180
+#define BUTTON_SHADOW_OFFSET_X -12
+#define BUTTON_SHADOW_OFFSET_Y 12
+
 static int s_seigaiha_parallax_x = 0;
 static int s_seigaiha_parallax_y = 0;
 static int s_seigaiha_direction_x = 1;
@@ -264,11 +269,68 @@ void renderSelectionCursorF(SDL_Renderer* rend, FRect* frect) {
     SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
 }
 
-Button* createButton(SDL_Rect rect, buttonCallback callback){
+SDL_Texture* createButtonTexture(SDL_Renderer* rend, SDL_Rect* rect) {
+    SDL_Texture* tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, rect->w, rect->h);
+
+    uint8_t r,g,b,a;
+    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
+
+    if (tex == NULL || SDL_SetRenderTarget(rend, tex) < 0) goto button_tex_fail;
+    if (SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND) < 0) goto button_tex_fail;
+
+    // fill texture with transparent pixels
+    SDL_SetRenderDrawColor(rend, 0x00, 0x00, 0x00, 0x00);
+    SDL_RenderClear(rend);
+
+    // render button center
+    static const int o = 14;
+    SDL_Rect drawrect = { .x = o, .y = o, .w = rect->w - 2*o, .h = rect->h - 2*o };
+
+    SDL_SetRenderDrawColor(rend, 0xE7, 0xE6, 0xDE, SDL_ALPHA_OPAQUE);
+    SDL_RenderFillRect(rend, &drawrect);
+    
+    // render button frame 
+    SDL_SetRenderDrawColor(rend, 0x52, 0x47, 0x3C, SDL_ALPHA_OPAQUE);
+    
+    drawrect.x = 0;
+    drawrect.y = o;
+    drawrect.w = rect->w;
+    drawrect.h = o;
+    SDL_RenderFillRect(rend, &drawrect);
+
+    drawrect.y = rect->h - 2*o;
+    SDL_RenderFillRect(rend, &drawrect);
+
+    drawrect.x = o;
+    drawrect.y = 0;
+    drawrect.w = o;
+    drawrect.h = rect->h;
+    SDL_RenderFillRect(rend, &drawrect);
+
+    drawrect.x = rect->w - 2*o;
+    SDL_RenderFillRect(rend, &drawrect);
+    
+    SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
+
+    // detach texture from renderer 
+    if (SDL_SetRenderTarget(rend, NULL) >= 0) {
+        return tex;
+    }
+
+button_tex_fail:
+    fprintf(stderr, "Failed to create the button texture. \nSDL_Error: %s\n", SDL_GetError());
+    SDL_SetRenderTarget(rend, NULL);
+    SDL_DestroyTexture(tex);
+    return NULL;
+}
+
+Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback){
     Button* btn = malloc(sizeof(Button));
     if (btn != NULL) {
         btn->rect = rect;
         btn->callback = callback;
+        btn->tex = createButtonTexture(ctx->renderer, &rect);
+        btn->shadow_tex = generateShadowFromTexture(ctx->renderer, btn->tex, BUTTON_SHADOW_RADIUS, BUTTON_SHADOW_STRENGTH);
     }
 
     return btn;
@@ -279,13 +341,16 @@ void destroyButton(Button* btn) {
 }
 
 void renderButton(SDL_Renderer* rend, Button* btn) {
-    uint8_t r,g,b,a;
-    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
+    SDL_Rect shadow_rect = { 
+        .x = btn->rect.x + BUTTON_SHADOW_OFFSET_X - BUTTON_SHADOW_RADIUS,
+        .y = btn->rect.y + BUTTON_SHADOW_OFFSET_Y - BUTTON_SHADOW_RADIUS, 
+        .w = btn->rect.w + 2*BUTTON_SHADOW_RADIUS, 
+        .h = btn->rect.h + 2*BUTTON_SHADOW_RADIUS 
+    };
 
-    SDL_SetRenderDrawColor(rend, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-    SDL_RenderFillRect(rend, &btn->rect);
+    SDL_RenderCopy(rend, btn->shadow_tex, NULL, &shadow_rect); // render button shadow
 
-    SDL_SetRenderDrawColor(rend, r, g, b, a); // restore original color
+    SDL_RenderCopy(rend, btn->tex, NULL, &btn->rect); // render button texture
 }
 
 void destroyUI() {

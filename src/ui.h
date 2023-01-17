@@ -29,9 +29,11 @@ typedef void (*buttonCallback)(AppState* state);
 struct Button {
     SDL_Rect rect;
     buttonCallback callback;
+    SDL_Texture* tex;
+    SDL_Texture* shadow_tex;
 };
 
-Button* createButton(SDL_Rect rect, buttonCallback callback);
+Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback);
 void destroyButton(Button* btn);
 
 void renderButton(SDL_Renderer* rend, Button* btn);
