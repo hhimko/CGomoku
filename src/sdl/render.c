@@ -37,7 +37,6 @@ void drawFilledFRect(SDL_Renderer* rend, FRect* frect) {
     SDL_SetRenderDrawColor(rend, r, g, b, alpha);
     SDL_RenderDrawLine(rend, (int)ex, (int)sy, (int)ex, (int)ey - 1);
 
-
     // center
     SDL_Rect crect = {
         .x = (int)sx,
@@ -70,7 +69,7 @@ void drawFRectBorder(SDL_Renderer* rend, FRect* frect, float thickness, BorderTy
     // left
     line_frect.y = frect->y - off;
     line_frect.w = thickness;
-    line_frect.h = frect->w + off2;
+    line_frect.h = frect->h + off2;
     drawFilledFRect(rend, &line_frect);
 
     // right
