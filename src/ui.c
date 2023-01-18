@@ -403,7 +403,7 @@ Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback)
 }
 
 void renderButton(SDL_Renderer* rend, Button* btn) {
-    // render button shadow
+    
     int shadow_off_x = (int)round(BUTTON_SHADOW_OFFSET_X * (1.0 - btn->select_animation->t));
     int shadow_off_y = (int)round(BUTTON_SHADOW_OFFSET_Y * (1.0 - btn->select_animation->t));
 
@@ -413,29 +413,33 @@ void renderButton(SDL_Renderer* rend, Button* btn) {
         .w = btn->rect.w + 2*BUTTON_SHADOW_RADIUS, 
         .h = btn->rect.h + 2*BUTTON_SHADOW_RADIUS 
     };
-
-    SDL_RenderCopy(rend, btn->shadow_tex, NULL, &shadow_rect); 
-
-    // render button texture
+    
     SDL_Rect btn_rect = btn->rect;
     if (btn->select_animation->t > 0.0) {
-        int selection_shrink = (int)round(5 * btn->select_animation->t);
+        int selection_shrink = (int)round(10 * btn->select_animation->t);
         btn_rect.x += selection_shrink / 2;
         btn_rect.y += selection_shrink / 2;
         btn_rect.w -= selection_shrink;
         btn_rect.h -= selection_shrink;
     }
 
-    SDL_RenderCopy(rend, btn->tex, NULL, &btn_rect); 
+    SDL_RenderCopy(rend, btn->shadow_tex, NULL, &shadow_rect); // render button shadow
+
+    SDL_RenderCopy(rend, btn->tex, NULL, &btn_rect); // render button texture
 }
 
 void buttonSelect(Button* btn) {
-    pushAnimation(btn->select_animation, 100, ANIMATION_TYPE_SMOOTHSTEP, ANIMATION_ONESHOT, ANIMATION_NO_REVERSE);
+    Animation* anim = btn->select_animation;
+    anim->cancel(anim);
+
+    pushAnimation(anim, 150, ANIMATION_TYPE_SMOOTHSTEP, ANIMATION_ONESHOT, ANIMATION_NO_REVERSE);
 }
 
 void buttonDeselect(Button* btn) {
     Animation* anim = btn->select_animation;
     anim->cancel(anim);
+
+    pushAnimation(anim, 200, ANIMATION_TYPE_SMOOTHSTEP, ANIMATION_ONESHOT, ANIMATION_REVERSED);
 }
 
 void destroyButton(Button* btn) {
