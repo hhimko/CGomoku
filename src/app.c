@@ -100,29 +100,25 @@ int Gomoku_run(int argc, char* argv[]) {
 
     SDL_Window* window = NULL;
     RenderContext* context = createRenderContext(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
-
-    if (initSDL(context, &window) < 0) {
-        fprintf(stderr, "Failed to initialize SDL.\n SDL_Error: %s\n", SDL_GetError()); 
-        quitSDL(context, window);
-        destroyRenderContext(context);
-        return -1;
+    if (context == NULL || initSDL(context, &window) < 0) {
+        fprintf(stderr, "Failed to initialize SDL.\n"); 
+        goto run_fail_0;
     }
     
     if (initializeAnimationModule() < 0) {
-        fprintf(stderr, "Failed to initialize Animation Module.\n"); 
-        destroyAnimationModule();
-        quitSDL(context, window);
-        destroyRenderContext(context);
-        return -1;
+        fprintf(stderr, "Failed to initialize Animation module.\n"); 
+        goto run_fail_1;
+    }
+
+    if (initializeUI() < 0) {
+        fprintf(stderr, "Failed to initialize UI module.\n"); 
+        goto run_fail_2;
     }
 
     AppState* state = createAppState(context, fps);
     if (state == NULL) {
         fprintf(stderr, "Failed to create AppState.\n"); 
-        destroyAnimationModule();
-        quitSDL(context, window);
-        destroyRenderContext(context);
-        return -1;
+        goto run_fail_2;
     }
 
     //
@@ -133,11 +129,21 @@ int Gomoku_run(int argc, char* argv[]) {
 
     // free up resources after the mainloop quits
     destroyAppState(state);
-    destroyAnimationModule();
     destroyUI();
+    destroyAnimationModule();
     quitSDL(context, window);
     destroyRenderContext(context);
     return 0;
+
+
+run_fail_2:
+    destroyUI();
+run_fail_1:
+    destroyAnimationModule();
+run_fail_0:
+    quitSDL(context, window);
+    destroyRenderContext(context);
+    return -1;
 }
 
 void Gomoku_shutdown() {

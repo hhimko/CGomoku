@@ -3,6 +3,12 @@
 
 #include <stdint.h>
 
+#define ANIMATION_ONESHOT 0
+#define ANIMATION_LOOPING 1
+
+#define ANIMATION_NO_REVERSE 0
+#define ANIMATION_REVERSED   1
+
 
 typedef enum AnimationType {
     ANIMATION_TYPE_LINEAR,
@@ -10,7 +16,18 @@ typedef enum AnimationType {
     ANIMATION_TYPE_SMOOTHSTEP_INOUT
 } AnimationType;
 
-void pushAnimation(double* pvar, uint32_t duration, AnimationType type, int looping);
+typedef struct Animation Animation;
+typedef void (*animationCancelCallback)(Animation* anim);
+
+struct Animation {
+    double t;
+    animationCancelCallback cancel;
+};
+
+Animation* createAnimation(double start_value);
+void destroyAnimation(Animation* anim);
+
+void pushAnimation(Animation* anim, uint32_t duration, AnimationType type, int looping, int reversed);
 void updateAnimations(uint64_t dt);
 void clearAnimations();
 

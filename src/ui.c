@@ -28,10 +28,10 @@ static int s_seigaiha_parallax_y = 0;
 static int s_seigaiha_direction_x = 1;
 static int s_seigaiha_direction_y = 1;
 
-static double s_background_offset = 0.0;
+static Animation* s_background_animation = NULL;
 static SDL_Texture* s_background_texture = NULL;
 
-static double s_cursor_animation_t = 0.0;
+static Animation* s_cursor_animation = NULL;
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -66,11 +66,11 @@ void randomizeSeigaihaBackgroundDirection() {
 }
 
 void pushSeigaihaAnimation() {
-    pushAnimation(&s_background_offset, 4000, ANIMATION_TYPE_LINEAR, 1);
+    pushAnimation(s_background_animation, 4000, ANIMATION_TYPE_LINEAR, ANIMATION_LOOPING, ANIMATION_NO_REVERSE);
 }
 
 void renderSeigaihaBackground(RenderContext* ctx) {
-    int animation_offset = 2*SEIGAIHA_RADIUS - (int)round(2*SEIGAIHA_RADIUS*s_background_offset);
+    int animation_offset = 2*SEIGAIHA_RADIUS - (int)round(2*SEIGAIHA_RADIUS*s_background_animation->t);
 
     SDL_Rect rect = { 
         .x = -s_seigaiha_parallax_x - SEIGAIHA_RADIUS*2 - animation_offset*s_seigaiha_direction_x,
@@ -172,13 +172,13 @@ void renderTatamiBackground(RenderContext* ctx, double zoom, double offset_x, do
 }
 
 void pushCursorAnimation() {
-    pushAnimation(&s_cursor_animation_t, 2000, ANIMATION_TYPE_SMOOTHSTEP_INOUT, 1);
+    pushAnimation(s_cursor_animation, 2000, ANIMATION_TYPE_SMOOTHSTEP_INOUT, ANIMATION_LOOPING, ANIMATION_NO_REVERSE);
 }
 
 void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
     static const float thickness = 10.0f; 
     static const float length = 30; 
-    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)s_cursor_animation_t; 
+    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)s_cursor_animation->t; 
 
     uint8_t r,g,b,a;
     SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
@@ -228,7 +228,7 @@ void renderSelectionCursor(SDL_Renderer* rend, SDL_Rect* rect) {
 void renderSelectionCursorF(SDL_Renderer* rend, FRect* frect) {
     static const float thickness = 10.0f; 
     static const float length = 30; 
-    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)s_cursor_animation_t; 
+    float offset = 10.0f + CURSOR_ANIMATION_STRENGTH * (float)s_cursor_animation->t; 
 
     uint8_t r,g,b,a;
     SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
@@ -391,20 +391,21 @@ Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback)
         btn->callback = callback;
         btn->tex = createButtonTexture(ctx->renderer, &rect);
         btn->shadow_tex = generateShadowFromTexture(ctx->renderer, btn->tex, BUTTON_SHADOW_RADIUS, BUTTON_SHADOW_STRENGTH);
-        btn->select_animation_t = 0.0;
+
+        btn->select_animation = createAnimation(0.0);
+        if (btn->select_animation == NULL){
+            destroyButton(btn);
+            return NULL;
+        }
     }
 
     return btn;
 }
 
-void destroyButton(Button* btn) {
-    free(btn);
-}
-
 void renderButton(SDL_Renderer* rend, Button* btn) {
     // render button shadow
-    int shadow_off_x = (int)round(BUTTON_SHADOW_OFFSET_X * (1.0 - btn->select_animation_t));
-    int shadow_off_y = (int)round(BUTTON_SHADOW_OFFSET_Y * (1.0 - btn->select_animation_t));
+    int shadow_off_x = (int)round(BUTTON_SHADOW_OFFSET_X * (1.0 - btn->select_animation->t));
+    int shadow_off_y = (int)round(BUTTON_SHADOW_OFFSET_Y * (1.0 - btn->select_animation->t));
 
     SDL_Rect shadow_rect = { 
         .x = btn->rect.x - BUTTON_SHADOW_RADIUS + shadow_off_x,
@@ -417,8 +418,8 @@ void renderButton(SDL_Renderer* rend, Button* btn) {
 
     // render button texture
     SDL_Rect btn_rect = btn->rect;
-    if (btn->select_animation_t > 0.0) {
-        int selection_shrink = (int)round(5 * btn->select_animation_t);
+    if (btn->select_animation->t > 0.0) {
+        int selection_shrink = (int)round(5 * btn->select_animation->t);
         btn_rect.x += selection_shrink / 2;
         btn_rect.y += selection_shrink / 2;
         btn_rect.w -= selection_shrink;
@@ -429,13 +430,29 @@ void renderButton(SDL_Renderer* rend, Button* btn) {
 }
 
 void buttonSelect(Button* btn) {
-    pushAnimation(&btn->select_animation_t, 150, ANIMATION_TYPE_SMOOTHSTEP, 0);
+    pushAnimation(btn->select_animation, 100, ANIMATION_TYPE_SMOOTHSTEP, ANIMATION_ONESHOT, ANIMATION_NO_REVERSE);
 }
 
 void buttonDeselect(Button* btn) {
-    btn->select_animation_t = 0.0;
+    Animation* anim = btn->select_animation;
+    anim->cancel(anim);
+}
+
+void destroyButton(Button* btn) {
+    destroyAnimation(btn->select_animation);
+    free(btn);
+}
+
+int initializeUI() {
+    s_background_animation = createAnimation(0.0);
+    s_cursor_animation = createAnimation(0.0);
+    if (s_background_animation == NULL || s_cursor_animation == NULL) return -1;
+
+    return 0;
 }
 
 void destroyUI() {
+    destroyAnimation(s_background_animation);
+    destroyAnimation(s_cursor_animation);
     SDL_DestroyTexture(s_background_texture);
 }

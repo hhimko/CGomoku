@@ -4,7 +4,9 @@
 #include <SDL.h>
 
 #include "./sdl/render.h"
+#include "./animation.h"
 #include "./app.h"
+
 
 int loadSeigaihaBackgroundTexture(RenderContext* ctx, SDL_Color* bg, SDL_Color* fg);
 void randomizeSeigaihaBackgroundDirection();
@@ -31,16 +33,18 @@ struct Button {
     buttonCallback callback;
     SDL_Texture* tex;
     SDL_Texture* shadow_tex;
-    double select_animation_t;
+    Animation* select_animation;
 };
 
 Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback);
-void destroyButton(Button* btn);
 
 void renderButton(SDL_Renderer* rend, Button* btn);
 void buttonSelect(Button* btn);
 void buttonDeselect(Button* btn);
 
+void destroyButton(Button* btn);
+
+int initializeUI();
 void destroyUI();
 
 #endif /* UI_H_ */
