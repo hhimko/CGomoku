@@ -31,12 +31,15 @@ struct Button {
     buttonCallback callback;
     SDL_Texture* tex;
     SDL_Texture* shadow_tex;
+    double select_animation_t;
 };
 
 Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback);
 void destroyButton(Button* btn);
 
 void renderButton(SDL_Renderer* rend, Button* btn);
+void buttonSelect(Button* btn);
+void buttonDeselect(Button* btn);
 
 void destroyUI();
 

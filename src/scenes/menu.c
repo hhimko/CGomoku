@@ -1,5 +1,6 @@
 #include "./menu.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <SDL.h>
@@ -34,6 +35,37 @@ void buttonExitCallback(AppState* state) {
     Gomoku_shutdown();
 }
 
+void handleMouseMotion(int32_t mx, int32_t my) {
+    SDL_Point mp = { .x = mx, .y = my };
+
+    for (int i=0; i < MENU_BUTTONS_COUNT; ++i) {
+        if (SDL_PointInRect(&mp, &s_buttons[i]->rect)) {
+            if (i != s_selected_button) {
+                buttonDeselect(s_buttons[s_selected_button]);
+                s_selected_button = i;
+                buttonSelect(s_buttons[s_selected_button]);
+            }
+            return;
+        }
+    }
+}
+
+SDL_bool handleMouseDown(AppState* state, int32_t mx, int32_t my, uint8_t button) {
+    if (button != SDL_BUTTON_LEFT) return SDL_FALSE;
+
+    updateSeigaihaBackgroundParallax(state->context, mx, my);
+    handleMouseMotion(mx, my);
+
+    SDL_Point mp = { .x = mx, .y = my };
+    Button* btn = s_buttons[s_selected_button];
+    if (SDL_PointInRect(&mp, &btn->rect)) {
+        btn->callback(state);
+        return SDL_TRUE;
+    }
+
+    return SDL_FALSE;
+}
+
 void menuUpdate(uint64_t dt) {
     (void) dt;
 }
@@ -52,7 +84,11 @@ SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
             updateSeigaihaBackgroundParallax(state->context, e->motion.x, e->motion.y);
+            handleMouseMotion(e->motion.x, e->motion.y);
             break;
+
+        case SDL_MOUSEBUTTONDOWN:
+            if (handleMouseDown(state, e->button.x, e->button.y, e->button.button)) return SDL_TRUE;
 
         case SDL_KEYDOWN:
             switch (e->key.keysym.sym) {

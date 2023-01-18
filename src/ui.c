@@ -18,7 +18,7 @@
 #define BUTTON_FRAME_BEVEL_THICKNESS   2
 
 #define BUTTON_SHADOW_RADIUS 8
-#define BUTTON_SHADOW_STRENGTH 140
+#define BUTTON_SHADOW_STRENGTH 160
 #define BUTTON_SHADOW_OFFSET_X -6
 #define BUTTON_SHADOW_OFFSET_Y 6
 
@@ -391,6 +391,7 @@ Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback)
         btn->callback = callback;
         btn->tex = createButtonTexture(ctx->renderer, &rect);
         btn->shadow_tex = generateShadowFromTexture(ctx->renderer, btn->tex, BUTTON_SHADOW_RADIUS, BUTTON_SHADOW_STRENGTH);
+        btn->select_animation_t = 0.0;
     }
 
     return btn;
@@ -401,16 +402,38 @@ void destroyButton(Button* btn) {
 }
 
 void renderButton(SDL_Renderer* rend, Button* btn) {
+    // render button shadow
+    int shadow_off_x = (int)round(BUTTON_SHADOW_OFFSET_X * (1.0 - btn->select_animation_t));
+    int shadow_off_y = (int)round(BUTTON_SHADOW_OFFSET_Y * (1.0 - btn->select_animation_t));
+
     SDL_Rect shadow_rect = { 
-        .x = btn->rect.x + BUTTON_SHADOW_OFFSET_X - BUTTON_SHADOW_RADIUS,
-        .y = btn->rect.y + BUTTON_SHADOW_OFFSET_Y - BUTTON_SHADOW_RADIUS, 
+        .x = btn->rect.x - BUTTON_SHADOW_RADIUS + shadow_off_x,
+        .y = btn->rect.y - BUTTON_SHADOW_RADIUS + shadow_off_y, 
         .w = btn->rect.w + 2*BUTTON_SHADOW_RADIUS, 
         .h = btn->rect.h + 2*BUTTON_SHADOW_RADIUS 
     };
 
-    SDL_RenderCopy(rend, btn->shadow_tex, NULL, &shadow_rect); // render button shadow
+    SDL_RenderCopy(rend, btn->shadow_tex, NULL, &shadow_rect); 
 
-    SDL_RenderCopy(rend, btn->tex, NULL, &btn->rect); // render button texture
+    // render button texture
+    SDL_Rect btn_rect = btn->rect;
+    if (btn->select_animation_t > 0.0) {
+        int selection_shrink = (int)round(5 * btn->select_animation_t);
+        btn_rect.x += selection_shrink / 2;
+        btn_rect.y += selection_shrink / 2;
+        btn_rect.w -= selection_shrink;
+        btn_rect.h -= selection_shrink;
+    }
+
+    SDL_RenderCopy(rend, btn->tex, NULL, &btn_rect); 
+}
+
+void buttonSelect(Button* btn) {
+    pushAnimation(&btn->select_animation_t, 150, ANIMATION_TYPE_SMOOTHSTEP, 0);
+}
+
+void buttonDeselect(Button* btn) {
+    btn->select_animation_t = 0.0;
 }
 
 void destroyUI() {
