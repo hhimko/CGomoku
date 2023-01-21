@@ -21,9 +21,8 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # Add SDL2 libs
 if(WIN32)
-    
-    # find_package(SDL2 QUIET)
-    find_package(SDL2main QUIET)
+    set(SDL2_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2)
+    find_package(SDL2 QUIET)
 
     # Fall back to looking for SDL2 locally
     if(NOT SDL2_FOUND)
@@ -49,12 +48,27 @@ if(WIN32)
                 set(SDL2_LIBRARIES ${INCLUDE_DIR}/lib/x86/SDL2.lib;${INCLUDE_DIR}/lib/x86/SDL2main.lib)
                 file(COPY ${INCLUDE_DIR}/lib/x64/SDL2.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
                 file(COPY ${INCLUDE_DIR}/lib/x64/SDL2.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
-                endif()
+            endif()
         endif() # if(MINGW)
         string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
     endif() # if(NOT SDL2_FOUND)
+
+    # Find SDL2_mixer
+    set(SDL2_MIXER_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_mixer)
+
+    if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+        set(SDL2_MIXER_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_mixer/x86_64-w64-mingw32/lib/libSDL2_mixer.dll.a)
+        set(SDL2_MIXER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_mixer/x86_64-w64-mingw32/include/SDL2)
+    else()
+        set(SDL2_MIXER_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_mixer/i686-w64-mingw32/lib/libSDL2_mixer.dll.a)
+        set(SDL2_MIXER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_mixer/i686-w64-mingw32/include/SDL2)
+    endif()
+
+    find_package(SDL2_mixer REQUIRED)
+
 else() # Target system is not Windows
     find_package(SDL2 REQUIRED)
+    find_package(SDL2_mixer REQUIRED)
 endif()
 
 # Link libm if found
@@ -65,8 +79,9 @@ if(LIBM)
     list(APPEND LIBM_LIBRARIES "m")
 endif()
 
-target_link_libraries(${BIN_NAME} ${SDL2_LIBRARIES} ${LIBM_LIBRARIES})
-target_include_directories(${BIN_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})
+target_link_libraries(${BIN_NAME} ${SDL2_LIBRARIES} ${SDL2_MIXER_LIBRARIES} ${LIBM_LIBRARIES})
+target_include_directories(${BIN_NAME} PUBLIC ${SDL2_INCLUDE_DIRS} ${SDL2_MIXER_INCLUDE_DIRS})
+
 
 # Copy asset directory to executable path
 file(COPY assets DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
