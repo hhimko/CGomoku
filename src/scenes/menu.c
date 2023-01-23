@@ -50,7 +50,7 @@ void handleMouseMotion(int32_t mx, int32_t my) {
     }
 }
 
-SDL_bool handleMouseDown(AppState* state, int32_t mx, int32_t my, uint8_t button) {
+SDL_bool menuHandleMouseDown(AppState* state, int32_t mx, int32_t my, uint8_t button) {
     if (button != SDL_BUTTON_LEFT) return SDL_FALSE;
 
     updateSeigaihaBackgroundParallax(state->context, mx, my);
@@ -59,7 +59,7 @@ SDL_bool handleMouseDown(AppState* state, int32_t mx, int32_t my, uint8_t button
     SDL_Point mp = { .x = mx, .y = my };
     Button* btn = s_buttons[s_selected_button];
     if (SDL_PointInRect(&mp, &btn->rect)) {
-        btn->callback(state);
+        buttonPress(btn, state);
         return SDL_TRUE;
     }
 
@@ -88,23 +88,28 @@ SDL_bool menuHandleInput(SDL_Event* e, AppState* state) {
             break;
 
         case SDL_MOUSEBUTTONDOWN:
-            if (handleMouseDown(state, e->button.x, e->button.y, e->button.button)) return SDL_TRUE;
+            if (menuHandleMouseDown(state, e->button.x, e->button.y, e->button.button)) return SDL_TRUE;
+            break;
 
         case SDL_KEYDOWN:
             switch (e->key.keysym.sym) {
                 case SDLK_UP:
                     // decrement selected button index on key up
+                    buttonDeselect(s_buttons[s_selected_button]);
                     s_selected_button = (--s_selected_button > MENU_BUTTONS_COUNT) ? MENU_BUTTONS_COUNT - 1 : s_selected_button;
+                    buttonSelect(s_buttons[s_selected_button]);
                     return SDL_TRUE;
 
                 case SDLK_DOWN:
                     // increment selected button index on key down
+                    buttonDeselect(s_buttons[s_selected_button]);
                     s_selected_button = (++s_selected_button) % MENU_BUTTONS_COUNT;
+                    buttonSelect(s_buttons[s_selected_button]);
                     return SDL_TRUE;
 
                 case SDLK_RETURN:
                     // fire selected button callback on key enter
-                    s_buttons[s_selected_button]->callback(state);
+                    buttonPress(s_buttons[s_selected_button], state);
                     return SDL_TRUE;
             }
     }

@@ -28,10 +28,28 @@ void optionsRender(RenderContext* ctx) {
     renderSelectionCursor(ctx->renderer, &s_return_button->rect);
 }
 
+SDL_bool optionsHandleMouseDown(AppState* state, int32_t mx, int32_t my, uint8_t button) {
+    if (button != SDL_BUTTON_LEFT) return SDL_FALSE;
+
+    updateSeigaihaBackgroundParallax(state->context, mx, my);
+
+    SDL_Point mp = { .x = mx, .y = my };
+    if (SDL_PointInRect(&mp, &s_return_button->rect)) {
+        buttonPress(s_return_button, state);
+        return SDL_TRUE;
+    }
+
+    return SDL_FALSE;
+}
+
 SDL_bool optionsHandleInput(SDL_Event* e, AppState* state) {
     switch (e->type) {
         case SDL_MOUSEMOTION:
             updateSeigaihaBackgroundParallax(state->context, e->motion.x, e->motion.y);
+            break;
+
+        case SDL_MOUSEBUTTONDOWN:
+            if (optionsHandleMouseDown(state, e->button.x, e->button.y, e->button.button)) return SDL_TRUE;
             break;
 
         case SDL_KEYDOWN:
@@ -39,7 +57,7 @@ SDL_bool optionsHandleInput(SDL_Event* e, AppState* state) {
                 case SDLK_ESCAPE:
                 case SDLK_RETURN:
                     // fire selected button callback on key enter | escape
-                    s_return_button->callback(state);
+                    buttonPress(s_return_button, state);
                     return SDL_TRUE;
             }
     }

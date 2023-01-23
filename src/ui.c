@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "./animation.h"
+#include "./sdl/mixer.h"
 #include "./sdl/render.h"
 #include "./sdl/texture.h"
 
@@ -428,10 +429,16 @@ void renderButton(SDL_Renderer* rend, Button* btn) {
     SDL_RenderCopy(rend, btn->tex, NULL, &btn_rect); // render button texture
 }
 
+void buttonPress(Button* btn, AppState* state) {
+    playSound(SOUND_BUTTON_SELECT);
+    btn->callback(state);
+}
+
 void buttonSelect(Button* btn) {
     Animation* anim = btn->select_animation;
     anim->cancel(anim);
 
+    playSound(SOUND_BUTTON_HOVER);
     pushAnimation(anim, 150, ANIMATION_TYPE_SMOOTHSTEP, ANIMATION_ONESHOT, ANIMATION_NO_REVERSE);
 }
 

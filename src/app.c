@@ -7,6 +7,7 @@
 #include <SDL.h>
 
 #include "./scenes/scene.h"
+#include "./sdl/mixer.h"
 #include "./animation.h"
 #include "./ui.h"
 
@@ -115,10 +116,15 @@ int Gomoku_run(int argc, char* argv[]) {
         goto run_fail_2;
     }
 
+    if (initializeMixer() < 0) {
+        fprintf(stderr, "Failed to initialize Mixer module.\n"); 
+        goto run_fail_3;
+    }
+
     AppState* state = createAppState(context, fps);
     if (state == NULL) {
         fprintf(stderr, "Failed to create AppState.\n"); 
-        goto run_fail_2;
+        goto run_fail_3;
     }
 
     //
@@ -129,6 +135,7 @@ int Gomoku_run(int argc, char* argv[]) {
 
     // free up resources after the mainloop quits
     destroyAppState(state);
+    destroyMixer();
     destroyUI();
     destroyAnimationModule();
     quitSDL(context, window);
@@ -136,6 +143,8 @@ int Gomoku_run(int argc, char* argv[]) {
     return 0;
 
 
+run_fail_3:
+    destroyMixer();
 run_fail_2:
     destroyUI();
 run_fail_1:

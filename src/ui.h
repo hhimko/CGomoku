@@ -39,6 +39,7 @@ struct Button {
 Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback);
 
 void renderButton(SDL_Renderer* rend, Button* btn);
+void buttonPress(Button* btn, AppState* state);
 void buttonSelect(Button* btn);
 void buttonDeselect(Button* btn);
 
