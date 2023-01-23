@@ -69,6 +69,49 @@ else() # Target system is not Windows
 endif()
 
 
+# Find SDL2_ttf
+if(WIN32)
+    set(SDL2_TTF_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_ttf)
+    find_package(SDL2_ttf QUIET)
+
+    # Fall back to looking for SDL2_ttf locally
+    if(NOT SDL2_TTF_FOUND)
+        if(MINGW)
+            # Support both 32 and 64 bit builds
+            if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+                set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_PATH}/x86_64-w64-mingw32/include/SDL2)
+                set(SDL2_TTF_LIBRARIES ${SDL2_TTF_PATH}/x86_64-w64-mingw32/lib/libSDL2_ttf.dll.a)
+                # Copy SDL2_ttf.dll to output dir
+                file(COPY ${SDL2_TTF_PATH}/x86_64-w64-mingw32/bin/SDL2_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+                file(COPY ${SDL2_TTF_PATH}/x86_64-w64-mingw32/bin/SDL2_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+            else()
+                set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_PATH}/i686-w64-mingw32/include/SDL2)
+                set(SDL2_TTF_LIBRARIES ${SDL2_TTF_PATH}/i686-w64-mingw32/lib/libSDL2_ttf.dll.a)
+                # Copy SDL2_ttf.dll to output dir
+                file(COPY ${SDL2_TTF_PATH}/i686-w64-mingw32/bin/SDL2_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+                file(COPY ${SDL2_TTF_PATH}/i686-w64-mingw32/bin/SDL2_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+            endif()
+        else() # Not using MinGW
+            set(SDL2_TTF_INCLUDE_DIRS ${SDL2_TTF_PATH}/include)
+            # Support both 32 and 64 bit builds
+            if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
+                set(SDL2_TTF_LIBRARIES ${SDL2_TTF_PATH}/lib/x64/SDL2_ttf.lib)
+                # Copy SDL2_ttf.dll to output dir
+                file(COPY ${SDL2_TTF_PATH}/lib/x64/SDL2_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+                file(COPY ${SDL2_TTF_PATH}/lib/x64/SDL2_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+            else()
+                set(SDL2_TTF_LIBRARIES ${SDL2_TTF_PATH}/lib/x86/SDL2_ttf.lib)
+                # Copy SDL2_ttf.dll to output dir
+                file(COPY ${SDL2_TTF_PATH}/lib/x86/SDL2_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
+                file(COPY ${SDL2_TTF_PATH}/lib/x86/SDL2_ttf.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
+            endif()
+        endif() # if(MINGW)
+    endif() # if(NOT SDL2_MIXER_FOUND)
+else() # Target system is not Windows
+    find_package(SDL2_mixer REQUIRED)
+endif()
+
+
 # Find SDL2_mixer
 if(WIN32)
     set(SDL2_MIXER_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_mixer)
@@ -95,13 +138,13 @@ if(WIN32)
             set(SDL2_MIXER_INCLUDE_DIRS ${SDL2_MIXER_PATH}/include)
             # Support both 32 and 64 bit builds
             if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
-                set(SDL2_LIBRARIES ${SDL2_MIXER_PATH}/lib/x64/SDL2_mixer.lib)
+                set(SDL2_MIXER_LIBRARIES ${SDL2_MIXER_PATH}/lib/x64/SDL2_mixer.lib)
                 # Copy SDL2_mixer.dll to output dir
                 file(COPY ${SDL2_MIXER_PATH}/lib/x64/SDL2_mixer.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
                 file(COPY ${SDL2_MIXER_PATH}/lib/x64/SDL2_mixer.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
             else()
-                set(SDL2_LIBRARIES ${SDL2_MIXER_PATH}/lib/x86/SDL2_mixer.lib)
-                # Copy SDL2.dll to output dir
+                set(SDL2_MIXER_LIBRARIES ${SDL2_MIXER_PATH}/lib/x86/SDL2_mixer.lib)
+                # Copy SDL2_mixer.dll to output dir
                 file(COPY ${SDL2_MIXER_PATH}/lib/x86/SDL2_mixer.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug)
                 file(COPY ${SDL2_MIXER_PATH}/lib/x86/SDL2_mixer.dll DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release)
             endif()
@@ -121,8 +164,8 @@ if(LIBM)
 endif()
 
 # Link all dependencies
-target_link_libraries(${BIN_NAME} ${SDL2_LIBRARIES} ${SDL2_MIXER_LIBRARIES} ${LIBM_LIBRARIES})
-target_include_directories(${BIN_NAME} PUBLIC ${SDL2_INCLUDE_DIRS} ${SDL2_MIXER_INCLUDE_DIRS})
+target_link_libraries(${BIN_NAME} ${SDL2_LIBRARIES} ${SDL2_TTF_LIBRARIES} ${SDL2_MIXER_LIBRARIES} ${LIBM_LIBRARIES})
+target_include_directories(${BIN_NAME} PUBLIC ${SDL2_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_MIXER_INCLUDE_DIRS})
 
 
 # Copy asset directory to executable path

@@ -1,4 +1,5 @@
 .vscode
 build
 include/SDL2
+include/SDL2_ttf
 include/SDL2_mixer
