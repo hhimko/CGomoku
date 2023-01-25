@@ -1,3 +1,6 @@
+// Copyright (c) Dawid "hhimko" Cyganek <dawid.cyganek1@gmail.com>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
 #ifndef TEXTURE_H_
 #define TEXTURE_H_
 
