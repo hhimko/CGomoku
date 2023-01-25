@@ -1,20 +1,20 @@
+<p align="center">
+  <img height="300"src="./logo.png">
+</p>
+
 # CGomoku
 
 An opensource game of [Gomoku] made in pure C and [SDL2]. Made as an university assignment for a C course. Enjoy!
-    
-> TODO: Add an in-game screenshot
 
+<p align="left">
+  <img width="800"src="./screenshot.png">
+</p>
 
 ## Overview
 
 CGomoku (otherwise known as *Five in a Row*) is a two player strategy game played on a 15x15 grid. 
 
 > TODO: Add Project overview and How-To-Play sections 
-
-
-## Installation
-
-> TODO: Add latest release build links
 
 ## Building & Compiling From Source
 
@@ -67,9 +67,10 @@ CGomoku uses no more than the `SDL2` library, along with two of its extension li
 
 ## License
 
-Author: Dawid Cyganek [@hhimko]
+CGomoku is licensed under the [MIT License].
+All game assets and sound effects were created by the author for the purpose of this project.
 
-> Todo: Add license description
+Author: Dawid Cyganek [@hhimko]
 
 
 
@@ -82,4 +83,5 @@ Author: Dawid Cyganek [@hhimko]
 [SDL2-mixer]: https://github.com/libsdl-org/SDL_mixer/releases
 [SDL2-devel]: https://github.com/libsdl-org/SDL/releases
 [dependencies]: #dependencies
+[MIT License]: https://opensource.org/licenses/MIT
 [@hhimko]: https://github.com/hhimko
