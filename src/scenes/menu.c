@@ -7,6 +7,8 @@
 
 #include "../app.h"
 #include "../ui.h"
+#include "../animation.h"
+#include "../sdl/texture.h"
 
 #define MENU_BUTTON_PLAY   0
 #define MENU_BUTTON_OPTS   1
@@ -15,11 +17,21 @@
 
 #define BUTTON_WIDTH  600
 #define BUTTON_HEIGHT 160
-#define BUTTON_GAP    40
+#define BUTTON_GAP    25
+
+#define LOGO_TEXTURE_HEIGHT 200
+#define LOGO_SHADOW_STRENGHT 140
+#define LOGO_SHADOW_RADIUS 24
+#define LOGO_SHADOW_OFFSET_X -8
+#define LOGO_SHADOW_OFFSET_Y 8
+#define LOGO_PADDING 30
 
 
 static Button* s_buttons[MENU_BUTTONS_COUNT] = { NULL, NULL, NULL };
 static size_t s_selected_button = MENU_BUTTON_PLAY;
+static SDL_Texture* s_logo_tex = NULL;
+static SDL_Texture* s_logo_shadow_tex = NULL;
+static int s_logo_tex_w;
 
 
 void buttonPlayCallback(AppState* state) {
@@ -72,6 +84,24 @@ void menuUpdate(uint64_t dt) {
 
 void menuRender(RenderContext* ctx) {
     renderSeigaihaBackground(ctx);
+
+    // render logo
+    SDL_Rect logo_rect = {
+        .x = ctx->win_w/2 - s_logo_tex_w/2,
+        .y = LOGO_PADDING,
+        .w = s_logo_tex_w,
+        .h = LOGO_TEXTURE_HEIGHT
+    };
+
+    SDL_Rect logo_shadow_rect = logo_rect;
+    logo_shadow_rect.x += -LOGO_SHADOW_RADIUS + LOGO_SHADOW_OFFSET_X;
+    logo_shadow_rect.y += -LOGO_SHADOW_RADIUS + LOGO_SHADOW_OFFSET_Y;
+    logo_shadow_rect.w += 2*LOGO_SHADOW_RADIUS;
+    logo_shadow_rect.h += 2*LOGO_SHADOW_RADIUS;
+
+
+    SDL_RenderCopy(ctx->renderer, s_logo_shadow_tex, NULL, &logo_shadow_rect);
+    SDL_RenderCopy(ctx->renderer, s_logo_tex, NULL, &logo_rect);
 
     for (size_t i = 0; i < MENU_BUTTONS_COUNT; ++i) {
         renderButton(ctx->renderer, s_buttons[i]);
@@ -132,10 +162,10 @@ int menuPrepare(AppState* state) {
     pushSeigaihaAnimation();
 
     int w = state->context->win_w;
-    int h = state->context->win_h;
+    // int h = state->context->win_h;
     SDL_Rect btn_rect = { 
         .x = w/2 - BUTTON_WIDTH/2, 
-        .y = h/2 - BUTTON_HEIGHT/2 - BUTTON_HEIGHT - BUTTON_GAP, 
+        .y = 2*LOGO_PADDING + LOGO_TEXTURE_HEIGHT, 
         .w = BUTTON_WIDTH, 
         .h = BUTTON_HEIGHT 
     };
@@ -156,6 +186,17 @@ int menuPrepare(AppState* state) {
     if (!s_buttons[MENU_BUTTON_PLAY] || !s_buttons[MENU_BUTTON_OPTS] || !s_buttons[MENU_BUTTON_EXIT]) 
         goto fail;
 
+    s_logo_tex = loadTextureBMP(state->context->renderer, "../assets/gomoku_logo.bmp");
+    if (s_logo_tex == NULL) goto fail;
+
+    int logo_w, logo_h;
+    getTextureSize(s_logo_tex, &logo_w, &logo_h);
+
+    float s = (float)logo_h/LOGO_TEXTURE_HEIGHT;
+    s_logo_tex_w = (int)(logo_w/s);
+
+    s_logo_shadow_tex = generateShadowFromTexture(state->context->renderer, s_logo_tex, LOGO_SHADOW_RADIUS, LOGO_SHADOW_STRENGHT);
+
     setMenuSceneCallbacks(state);
     return 0;
 
@@ -169,4 +210,5 @@ void menuDestroy() {
     destroyButton(s_buttons[MENU_BUTTON_PLAY]);
     destroyButton(s_buttons[MENU_BUTTON_OPTS]);
     destroyButton(s_buttons[MENU_BUTTON_EXIT]);
+    SDL_DestroyTexture(s_logo_tex);
 }
