@@ -11,7 +11,8 @@
 uint32_t* getTexturePixelArray(SDL_Renderer* rend, SDL_Texture* tex, int* w, int* h) {
     int _w, _h;
     if (getTextureSize(tex, &_w, &_h) < 0) return NULL;
-    uint32_t* array = malloc(sizeof(uint32_t)*_w*_h);
+    uint32_t* array = calloc(_w*_h, sizeof(uint32_t));
+    if (array == NULL) return NULL;
 
     if (w != NULL) *w = _w;
     if (h != NULL) *h = _h;

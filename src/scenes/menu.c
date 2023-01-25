@@ -141,15 +141,15 @@ int menuPrepare(AppState* state) {
     };
 
     // button play
-    s_buttons[MENU_BUTTON_PLAY] = createButton(state->context, btn_rect, buttonPlayCallback);
+    s_buttons[MENU_BUTTON_PLAY] = createButton(state->context, btn_rect, "PLAY", buttonPlayCallback);
 
     // button options
     btn_rect.y += BUTTON_HEIGHT + BUTTON_GAP;
-    s_buttons[MENU_BUTTON_OPTS] = createButton(state->context, btn_rect, buttonOptionsCallback);
+    s_buttons[MENU_BUTTON_OPTS] = createButton(state->context, btn_rect, "OPTIONS", buttonOptionsCallback);
 
     // button exit
     btn_rect.y += BUTTON_HEIGHT + BUTTON_GAP;
-    s_buttons[MENU_BUTTON_EXIT] = createButton(state->context, btn_rect, buttonExitCallback);
+    s_buttons[MENU_BUTTON_EXIT] = createButton(state->context, btn_rect, "QUIT", buttonExitCallback);
 
     s_selected_button = MENU_BUTTON_PLAY;
 

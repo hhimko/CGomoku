@@ -4,11 +4,15 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <SDL_ttf.h>
 
 #include "./animation.h"
 #include "./sdl/mixer.h"
 #include "./sdl/render.h"
 #include "./sdl/texture.h"
+
+#define DEFAULT_FONT_SIZE 62
+#define FONT_PATH "../assets/fonts/open-sans.ttf"
 
 #define SEIGAIHA_RADIUS 80
 #define CURSOR_ANIMATION_STRENGTH 15.0f
@@ -23,6 +27,7 @@
 #define BUTTON_SHADOW_OFFSET_X -6
 #define BUTTON_SHADOW_OFFSET_Y 6
 
+static TTF_Font* s_font = NULL;
 
 static int s_seigaiha_parallax_x = 0;
 static int s_seigaiha_parallax_y = 0;
@@ -385,10 +390,50 @@ button_tex_fail:
     return NULL;
 }
 
-Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback){
+SDL_Texture* renderTextToTexture(SDL_Renderer* rend, const char* text, int* w, int* h) {
+    uint8_t r,g,b,a;
+    SDL_GetRenderDrawColor(rend, &r, &g, &b, &a);
+    SDL_Color col = { .r=r, .g=b, .b=b, .a=a };
+    SDL_Surface* surf = TTF_RenderText_Solid(s_font, text, col);
+    if (surf == NULL) goto text_fail1;
+
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(rend, surf);
+    if (tex == NULL)  goto text_fail2;
+
+    *w = surf->w;
+    *h = surf->h;
+
+    SDL_FreeSurface(surf);
+    return tex;
+
+text_fail2:
+    SDL_FreeSurface(surf);
+text_fail1:
+    printf("Failed to render text to texture. SDL_TTF Error: %s\n", TTF_GetError());
+    return NULL;
+}
+
+Label* createLabel(SDL_Renderer* rend, const char* text, int font_size) {
+    Label* label = malloc(sizeof(Label));
+    if (label != NULL) {
+        TTF_SetFontSize(s_font, font_size);
+        label->tex = renderTextToTexture(rend, text, &label->width, &label->height);
+    }
+
+    return label;
+}
+
+void destroyLabel(Label* label) {
+    if (label == NULL) return;
+    SDL_DestroyTexture(label->tex);
+    free(label);
+}
+
+Button* createButton(RenderContext* ctx, SDL_Rect rect, const char* text, buttonCallback callback){
     Button* btn = malloc(sizeof(Button));
     if (btn != NULL) {
         btn->rect = rect;
+        btn->label = createLabel(ctx->renderer, text, DEFAULT_FONT_SIZE); // TODO: make the label size dynamic
         btn->callback = callback;
         btn->tex = createButtonTexture(ctx->renderer, &rect);
         btn->shadow_tex = generateShadowFromTexture(ctx->renderer, btn->tex, BUTTON_SHADOW_RADIUS, BUTTON_SHADOW_STRENGTH);
@@ -404,7 +449,6 @@ Button* createButton(RenderContext* ctx, SDL_Rect rect, buttonCallback callback)
 }
 
 void renderButton(SDL_Renderer* rend, Button* btn) {
-    
     int shadow_off_x = (int)round(BUTTON_SHADOW_OFFSET_X * (1.0 - btn->select_animation->t));
     int shadow_off_y = (int)round(BUTTON_SHADOW_OFFSET_Y * (1.0 - btn->select_animation->t));
 
@@ -414,19 +458,34 @@ void renderButton(SDL_Renderer* rend, Button* btn) {
         .w = btn->rect.w + 2*BUTTON_SHADOW_RADIUS, 
         .h = btn->rect.h + 2*BUTTON_SHADOW_RADIUS 
     };
+
+    int label_w = btn->label->width;
+    int label_h = btn->label->height;
     
     SDL_Rect btn_rect = btn->rect;
+    SDL_Rect label_rect = { 
+        .x = btn->rect.x + btn->rect.w/2 - label_w/2,
+        .y = btn->rect.y + btn->rect.h/2 - label_h/2,
+        .w = label_w, 
+        .h = label_h 
+    };
+
     if (btn->select_animation->t > 0.0) {
         int selection_shrink = (int)round(10 * btn->select_animation->t);
-        btn_rect.x += selection_shrink / 2;
-        btn_rect.y += selection_shrink / 2;
+        btn_rect.x += selection_shrink/2;
+        btn_rect.y += selection_shrink/2;
         btn_rect.w -= selection_shrink;
         btn_rect.h -= selection_shrink;
+
+        label_rect.x += selection_shrink/2;
+        label_rect.y += selection_shrink/2;
+        label_rect.w -= selection_shrink;
+        label_rect.h -= selection_shrink;
     }
 
     SDL_RenderCopy(rend, btn->shadow_tex, NULL, &shadow_rect); // render button shadow
-
     SDL_RenderCopy(rend, btn->tex, NULL, &btn_rect); // render button texture
+    SDL_RenderCopy(rend, btn->label->tex, NULL, &label_rect); // render label texture
 }
 
 void buttonPress(Button* btn, AppState* state) {
@@ -450,11 +509,24 @@ void buttonDeselect(Button* btn) {
 }
 
 void destroyButton(Button* btn) {
+    if (btn == NULL) return;
+    destroyLabel(btn->label);
     destroyAnimation(btn->select_animation);
     free(btn);
 }
 
 int initializeUI() {
+    if (TTF_Init() < 0) {
+        fprintf(stderr, "Failed to initialize SDL_ttf. SDL_TTF Error: %s\n", TTF_GetError());
+        return -1;
+    }
+
+    s_font = TTF_OpenFont(FONT_PATH, DEFAULT_FONT_SIZE);
+    if (s_font == NULL) {
+        fprintf(stderr, "Failed to open TTF font from path `%s`.\n", FONT_PATH);
+        return -1;
+    }
+
     s_background_animation = createAnimation(0.0);
     s_cursor_animation = createAnimation(0.0);
     if (s_background_animation == NULL || s_cursor_animation == NULL) return -1;
@@ -463,6 +535,8 @@ int initializeUI() {
 }
 
 void destroyUI() {
+    TTF_CloseFont(s_font);
+
     destroyAnimation(s_background_animation);
     destroyAnimation(s_cursor_animation);
     SDL_DestroyTexture(s_background_texture);

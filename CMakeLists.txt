@@ -28,7 +28,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 # Find SDL2
 if(WIN32)
     set(SDL2_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2)
-    find_package(SDL2 QUIET)
+    # find_package(SDL2 QUIET)
 
     # Fall back to looking for SDL2 locally
     if(NOT SDL2_FOUND)
@@ -72,7 +72,7 @@ endif()
 # Find SDL2_ttf
 if(WIN32)
     set(SDL2_TTF_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_ttf)
-    find_package(SDL2_ttf QUIET)
+    # find_package(SDL2_ttf QUIET)
 
     # Fall back to looking for SDL2_ttf locally
     if(NOT SDL2_TTF_FOUND)
@@ -115,7 +115,7 @@ endif()
 # Find SDL2_mixer
 if(WIN32)
     set(SDL2_MIXER_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include/SDL2_mixer)
-    find_package(SDL2_mixer QUIET)
+    # find_package(SDL2_mixer QUIET)
 
     # Fall back to looking for SDL2_mixer locally
     if(NOT SDL2_MIXER_FOUND)

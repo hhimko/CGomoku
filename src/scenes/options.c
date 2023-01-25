@@ -88,7 +88,7 @@ int optionsPrepare(AppState* state) {
         .h = BUTTON_HEIGHT 
     };
 
-    s_return_button = createButton(state->context, btn_rect, buttonReturnCallback);
+    s_return_button = createButton(state->context, btn_rect, "RETURN", buttonReturnCallback);
     if (s_return_button == NULL) goto fail;
 
     setOptionsSceneCallbacks(state);
